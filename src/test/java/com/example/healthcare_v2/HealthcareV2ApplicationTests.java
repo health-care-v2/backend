@@ -1,0 +1,13 @@
+package com.example.healthcare_v2;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class HealthcareV2ApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
