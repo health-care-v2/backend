@@ -33,6 +33,11 @@ public class Diary extends BaseEntity {
     @Column(length = 500)
     private String content;
 
+    @Column(nullable = false)
+    private Boolean isPublic;
+
+    private Long likeCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patient patient;

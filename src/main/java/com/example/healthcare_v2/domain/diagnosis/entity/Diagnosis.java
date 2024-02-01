@@ -12,6 +12,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import java.util.List;
@@ -31,6 +32,7 @@ public class Diagnosis extends BaseEntity {
     private String content;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @JoinColumn(name = "diagnosis_id")
     private List<DiagnosisImage> images;
 
     @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE,mappedBy = "diagnosis")

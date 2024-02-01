@@ -1,8 +1,7 @@
-package com.example.healthcare_v2.domain.connect.entity;
+package com.example.healthcare_v2.domain.like.entity;
 
-import com.example.healthcare_v2.domain.doctor.entity.Doctor;
+import com.example.healthcare_v2.domain.diary.entity.Diary;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
-import com.example.healthcare_v2.global.common.BaseEntity;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,7 +13,7 @@ import lombok.Getter;
 
 @Entity
 @Getter
-public class Connect extends BaseEntity {
+public class Like {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,6 +24,6 @@ public class Connect extends BaseEntity {
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "doctor_id")
-    private Doctor doctor;
+    @JoinColumn(name = "diary_id")
+    private Diary diary;
 }
