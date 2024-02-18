@@ -13,6 +13,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+
+import java.time.LocalDate;
 import java.util.List;
 import lombok.Getter;
 
@@ -30,6 +32,8 @@ public class Patient extends BaseEntity {
     private String encryptedPassword;
 
     private String name;
+
+    private LocalDate born;
 
     @Column(unique = true)
     private String phoneNumber;

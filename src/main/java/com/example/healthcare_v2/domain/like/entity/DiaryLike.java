@@ -13,7 +13,7 @@ import lombok.Getter;
 
 @Entity
 @Getter
-public class Like {
+public class DiaryLike {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
