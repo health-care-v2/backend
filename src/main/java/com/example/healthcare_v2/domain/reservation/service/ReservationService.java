@@ -8,8 +8,11 @@ import com.example.healthcare_v2.domain.reservation.dto.ReservationDto;
 import com.example.healthcare_v2.domain.reservation.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -23,7 +26,10 @@ public class ReservationService {
     public void saveReservation(ReservationDto reservationDto) {
             Patient patient = patientRepository.getReferenceById(reservationDto.patientId());
             Doctor doctor = doctorRepository.getReferenceById(reservationDto.doctorId());
-            reservationRepository.save(reservationDto.toEntity(reservationDto, patient, doctor));
+            reservationRepository.save(reservationDto.toEntity(patient, doctor));
     }
 
+    public Page<ReservationDto> getReservations(Pageable pageable) {
+        return reservationRepository.findAll(pageable).map(ReservationDto::from);
+    }
 }

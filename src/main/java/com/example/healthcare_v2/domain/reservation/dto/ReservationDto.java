@@ -7,7 +7,8 @@ import com.example.healthcare_v2.domain.reservation.entity.Reservation;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
-public record ReservationDto(String symptom,
+public record ReservationDto(Long id,
+                             String symptom,
                              LocalDate reservationDate,
                              LocalTime reservationTime,
                              Long patientId,
@@ -18,16 +19,25 @@ public record ReservationDto(String symptom,
                                     LocalTime reservationTime,
                                     Long patientId,
                                     Long doctorId) {
-        return new ReservationDto(symptom, reservationDate, reservationTime, patientId, doctorId);
+        return new ReservationDto(null, symptom, reservationDate, reservationTime, patientId, doctorId);
     }
 
-    public Reservation toEntity(ReservationDto reservationDto, Patient patient, Doctor doctor) {
+    public Reservation toEntity(Patient patient, Doctor doctor) {
         return Reservation.of(
                 symptom,
                 reservationDate,
                 reservationTime,
                 doctor,
                 patient
+        );
+    }
+
+    public static ReservationDto from(Reservation reservation) {
+        return ReservationDto.of(reservation.getSymptom(),
+                reservation.getReservationDate(),
+                reservation.getReservationTime(),
+                reservation.getDoctor().getId(),
+                reservation.getPatient().getId()
         );
     }
 }
