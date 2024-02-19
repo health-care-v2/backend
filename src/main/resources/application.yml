@@ -1,3 +1,12 @@
+debug: false
+management.endpoints.web.exposure.include: "*"
+
+logging:
+  level:
+    com.example: debug
+    org.springframework.web.servlet: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
+
 spring:
   config:
     import: optional:file:.env[.properties]
@@ -9,9 +18,13 @@ spring:
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
-    hibernate:
-      ddl-auto: create
+    open-in-view: false
+    defer-datasource-initialization: true
+    hibernate.ddl-auto: create
     show-sql: true
-    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate.format_sql: true
+      hibernate.default_batch_fetch_size: 100
+  sql.init.mode: always
 
 
