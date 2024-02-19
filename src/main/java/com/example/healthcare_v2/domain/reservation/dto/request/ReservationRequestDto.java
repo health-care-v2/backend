@@ -11,7 +11,7 @@ public record ReservationRequestDto(String symptom,
                                     Long patientId,
                                     Long doctorId) {
 
-    public ReservationDto toDto(ReservationRequestDto reservationRequestDto) {
+    public ReservationDto toDto() {
         return ReservationDto.of(symptom, reservationDate, reservationTime, patientId, doctorId);
     }
 }
