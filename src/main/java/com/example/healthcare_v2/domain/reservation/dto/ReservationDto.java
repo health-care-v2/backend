@@ -22,6 +22,15 @@ public record ReservationDto(Long id,
         return new ReservationDto(null, symptom, reservationDate, reservationTime, patientId, doctorId);
     }
 
+    public static ReservationDto of(Long id,
+                                    String symptom,
+                                    LocalDate reservationDate,
+                                    LocalTime reservationTime,
+                                    Long patientId,
+                                    Long doctorId) {
+        return new ReservationDto(id, symptom, reservationDate, reservationTime, patientId, doctorId);
+    }
+
     public Reservation toEntity(Patient patient, Doctor doctor) {
         return Reservation.of(
                 symptom,

@@ -1,6 +1,7 @@
 package com.example.healthcare_v2.domain.reservation.controller;
 
 import com.example.healthcare_v2.domain.reservation.dto.request.ReservationRequestDto;
+import com.example.healthcare_v2.domain.reservation.dto.request.ReservationUpdateRequestDto;
 import com.example.healthcare_v2.domain.reservation.dto.response.ReservationResponseDto;
 import com.example.healthcare_v2.domain.reservation.service.ReservationService;
 import com.example.healthcare_v2.global.utill.ResponseDTO;
@@ -42,7 +43,27 @@ public class ReservationController {
      */
     @PostMapping
     public ResponseEntity<ResponseDTO> createNewReservation(@RequestBody ReservationRequestDto reservationRequestDto) {
-        reservationService.saveReservation(reservationRequestDto.toDto(reservationRequestDto));
+        reservationService.saveReservation(reservationRequestDto.toDto());
+        return ResponseEntity.ok(ResponseDTO.ok());
+    }
+
+    /**
+     * 예약 변경
+     */
+    @PutMapping
+    public ResponseEntity<ResponseDTO> updateReservation(@RequestBody ReservationUpdateRequestDto reservationUpdateRequestDto) {
+        // TODO: 사용자 인증 필요
+        reservationService.updateReservation(reservationUpdateRequestDto.toDto());
+        return ResponseEntity.ok(ResponseDTO.ok());
+    }
+
+    /**
+     * 예약 취소
+     */
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<ResponseDTO> deleteReservation(@PathVariable(name = "reservationId") Long reservationId) {
+        // TODO: 사용자 인증 필요
+        reservationService.cancelReservation(reservationId);
         return ResponseEntity.ok(ResponseDTO.ok());
     }
 
