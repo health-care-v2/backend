@@ -6,6 +6,7 @@ import com.example.healthcare_v2.domain.patient.entity.Patient;
 import com.example.healthcare_v2.domain.patient.repository.PatientRepository;
 import com.example.healthcare_v2.domain.reservation.dto.ReservationDto;
 import com.example.healthcare_v2.domain.reservation.repository.ReservationRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -29,7 +30,15 @@ public class ReservationService {
         reservationRepository.save(reservationDto.toEntity(patient, doctor));
     }
 
+    @Transactional(readOnly = true)
     public Page<ReservationDto> getReservations(Pageable pageable) {
         return reservationRepository.findAll(pageable).map(ReservationDto::from);
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationDto getReservation(Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .map(ReservationDto::from)
+                .orElseThrow(() -> new EntityNotFoundException("예약이 없습니다. - reservationId: " + reservationId));
     }
 }

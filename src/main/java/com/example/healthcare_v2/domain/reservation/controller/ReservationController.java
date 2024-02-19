@@ -29,6 +29,15 @@ public class ReservationController {
     }
 
     /**
+     * 예약 상세 조회
+     */
+    @GetMapping("/{reservationId}")
+    public ResponseEntity<ResponseDTO<ReservationResponseDto>> reservation(@PathVariable(name = "reservationId") Long reservationId) {
+        ReservationResponseDto reservationResponseDto = ReservationResponseDto.from(reservationService.getReservation(reservationId));
+        return ResponseEntity.ok(ResponseDTO.okWithData(reservationResponseDto));
+    }
+
+    /**
      * 예약하기
      */
     @PostMapping
