@@ -69,4 +69,8 @@ public class ReservationService {
             log.warn("예약 업데이트 실패. {}", e.getLocalizedMessage());
         }
     }
+
+    public void cancelReservation(Long reservationId) {
+        reservationRepository.deleteById(reservationId);
+    }
 }

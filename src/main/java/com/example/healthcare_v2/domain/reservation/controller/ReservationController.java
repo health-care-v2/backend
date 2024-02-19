@@ -57,4 +57,14 @@ public class ReservationController {
         return ResponseEntity.ok(ResponseDTO.ok());
     }
 
+    /**
+     * 예약 취소
+     */
+    @DeleteMapping("/{reservationId}")
+    public ResponseEntity<ResponseDTO> deleteReservation(@PathVariable(name = "reservationId") Long reservationId) {
+        // TODO: 사용자 인증 필요
+        reservationService.cancelReservation(reservationId);
+        return ResponseEntity.ok(ResponseDTO.ok());
+    }
+
 }
