@@ -10,12 +10,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Objects;
 
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -26,19 +29,33 @@ public class Reservation extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String symptom;
+    @Setter private String symptom;
 
-    private LocalDate reservationDate;
+    @Setter private LocalDate reservationDate;
 
-    private LocalTime reservationTime;
+    @Setter private LocalTime reservationTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id")
+    @Setter
     private Doctor doctor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patient patient;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Reservation that)) return false;
+        return this.getId() != null && this.getId().equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getId());
+    }
+
 
     private Reservation(String symptom,
                         LocalDate reservationDate,
@@ -53,10 +70,10 @@ public class Reservation extends BaseEntity {
     }
 
     public static Reservation of(String symptom,
-                     LocalDate reservationDate,
-                     LocalTime reservationTime,
-                     Doctor doctor,
-                     Patient patient) {
+                                 LocalDate reservationDate,
+                                 LocalTime reservationTime,
+                                 Doctor doctor,
+                                 Patient patient) {
         return new Reservation(symptom, reservationDate, reservationTime, doctor, patient);
     }
 }
