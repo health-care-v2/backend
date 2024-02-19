@@ -24,9 +24,9 @@ public class ReservationService {
     private final DoctorRepository doctorRepository;
 
     public void saveReservation(ReservationDto reservationDto) {
-            Patient patient = patientRepository.getReferenceById(reservationDto.patientId());
-            Doctor doctor = doctorRepository.getReferenceById(reservationDto.doctorId());
-            reservationRepository.save(reservationDto.toEntity(patient, doctor));
+        Patient patient = patientRepository.getReferenceById(reservationDto.patientId());
+        Doctor doctor = doctorRepository.getReferenceById(reservationDto.doctorId());
+        reservationRepository.save(reservationDto.toEntity(patient, doctor));
     }
 
     public Page<ReservationDto> getReservations(Pageable pageable) {
