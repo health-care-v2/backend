@@ -6,10 +6,14 @@ import com.example.healthcare_v2.domain.patient.entity.Patient;
 import com.example.healthcare_v2.domain.patient.repository.PatientRepository;
 import com.example.healthcare_v2.domain.reservation.dto.ReservationDto;
 import com.example.healthcare_v2.domain.reservation.repository.ReservationRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 
 @Slf4j
 @RequiredArgsConstructor
@@ -21,9 +25,20 @@ public class ReservationService {
     private final DoctorRepository doctorRepository;
 
     public void saveReservation(ReservationDto reservationDto) {
-            Patient patient = patientRepository.getReferenceById(reservationDto.patientId());
-            Doctor doctor = doctorRepository.getReferenceById(reservationDto.doctorId());
-            reservationRepository.save(reservationDto.toEntity(reservationDto, patient, doctor));
+        Patient patient = patientRepository.getReferenceById(reservationDto.patientId());
+        Doctor doctor = doctorRepository.getReferenceById(reservationDto.doctorId());
+        reservationRepository.save(reservationDto.toEntity(patient, doctor));
     }
 
+    @Transactional(readOnly = true)
+    public Page<ReservationDto> getReservations(Pageable pageable) {
+        return reservationRepository.findAll(pageable).map(ReservationDto::from);
+    }
+
+    @Transactional(readOnly = true)
+    public ReservationDto getReservation(Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .map(ReservationDto::from)
+                .orElseThrow(() -> new EntityNotFoundException("예약이 없습니다. - reservationId: " + reservationId));
+    }
 }
