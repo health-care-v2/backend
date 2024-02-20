@@ -1,0 +1,48 @@
+package com.example.healthcare_v2.domain.patient.service;
+
+import com.example.healthcare_v2.domain.patient.controller.request.CreateUserRequest;
+import com.example.healthcare_v2.domain.patient.controller.request.LoginRequest;
+import com.example.healthcare_v2.domain.patient.controller.response.CreateUserResponse;
+import com.example.healthcare_v2.domain.patient.dto.TokenDTO;
+import com.example.healthcare_v2.domain.patient.entity.Patient;
+import com.example.healthcare_v2.domain.patient.exception.InvalidPasswordException;
+import com.example.healthcare_v2.domain.patient.exception.UserAlreadyRegisteredException;
+import com.example.healthcare_v2.domain.patient.repository.PatientRepository;
+import com.example.healthcare_v2.global.config.security.jwt.JwtProvider;
+import com.example.healthcare_v2.global.utill.ResponseDTO;
+import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+@RequiredArgsConstructor
+@Transactional
+public class PatientService {
+
+    private final PatientRepository patientRepository;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtProvider jwtProvider;
+
+    public CreateUserResponse registerNewUser(CreateUserRequest createUserRequest ){
+        patientRepository.findByEmail(createUserRequest.email()).ifPresent(user->{
+            throw new UserAlreadyRegisteredException();
+        });
+        String encodedPassword = passwordEncoder.encode(createUserRequest.password());
+        Patient newUser = createUserRequest.toEntity(encodedPassword);
+
+        patientRepository.save(newUser);
+        return CreateUserResponse.fromEntity(newUser);
+    }
+
+    public TokenDTO login(LoginRequest request) {
+        Optional<Patient> patient = patientRepository.findByEmail(request.email());
+
+        if (!passwordEncoder.matches(request.password(), patient.get().getEncryptedPassword())) {
+            throw new InvalidPasswordException();
+        }
+        String accessToken = jwtProvider.createToken(patient.get());
+        return new TokenDTO(accessToken);
+    }
+}
