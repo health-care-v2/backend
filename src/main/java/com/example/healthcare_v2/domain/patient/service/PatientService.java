@@ -7,6 +7,7 @@ import com.example.healthcare_v2.domain.patient.dto.TokenDTO;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
 import com.example.healthcare_v2.domain.patient.exception.InvalidPasswordException;
 import com.example.healthcare_v2.domain.patient.exception.UserAlreadyRegisteredException;
+import com.example.healthcare_v2.domain.patient.exception.UserNotFoundException;
 import com.example.healthcare_v2.domain.patient.repository.PatientRepository;
 import com.example.healthcare_v2.global.config.security.jwt.JwtProvider;
 import com.example.healthcare_v2.global.utill.ResponseDTO;
@@ -25,8 +26,8 @@ public class PatientService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
-    public CreateUserResponse registerNewUser(CreateUserRequest createUserRequest ){
-        patientRepository.findByEmail(createUserRequest.email()).ifPresent(user->{
+    public CreateUserResponse registerNewUser(CreateUserRequest createUserRequest) {
+        patientRepository.findByEmail(createUserRequest.email()).ifPresent(user -> {
             throw new UserAlreadyRegisteredException();
         });
         String encodedPassword = passwordEncoder.encode(createUserRequest.password());
@@ -37,12 +38,14 @@ public class PatientService {
     }
 
     public TokenDTO login(LoginRequest request) {
-        Optional<Patient> patient = patientRepository.findByEmail(request.email());
+        Patient patient = patientRepository.findByEmail(request.email())
+            .orElseThrow(UserNotFoundException::new);
 
-        if (!passwordEncoder.matches(request.password(), patient.get().getEncryptedPassword())) {
+        if (!passwordEncoder.matches(request.password(), patient.getEncryptedPassword())) {
             throw new InvalidPasswordException();
         }
-        String accessToken = jwtProvider.createToken(patient.get());
+
+        String accessToken = jwtProvider.createToken(patient);
         return new TokenDTO(accessToken);
     }
 }
