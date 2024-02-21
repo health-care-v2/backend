@@ -29,20 +29,26 @@ public class Reservation extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Setter private String symptom;
+    private String symptom;
 
-    @Setter private LocalDate reservationDate;
+    private LocalDate reservationDate;
 
-    @Setter private LocalTime reservationTime;
+    private LocalTime reservationTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id")
-    @Setter
     private Doctor doctor;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patient patient;
+
+    public void changeReservation(String symptom, LocalDate reservationDate, LocalTime reservationTime, Doctor doctor) {
+        this.symptom = symptom;
+        this.reservationDate = reservationDate;
+        this.reservationTime = reservationTime;
+        this.doctor = doctor;
+    }
 
     @Override
     public boolean equals(Object o) {

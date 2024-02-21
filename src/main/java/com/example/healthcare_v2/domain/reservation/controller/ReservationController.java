@@ -5,6 +5,7 @@ import com.example.healthcare_v2.domain.reservation.dto.request.ReservationUpdat
 import com.example.healthcare_v2.domain.reservation.dto.response.ReservationResponseDto;
 import com.example.healthcare_v2.domain.reservation.service.ReservationService;
 import com.example.healthcare_v2.global.utill.ResponseDTO;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -51,7 +52,7 @@ public class ReservationController {
      * 예약 변경
      */
     @PutMapping
-    public ResponseEntity<ResponseDTO> updateReservation(@RequestBody ReservationUpdateRequestDto reservationUpdateRequestDto) {
+    public ResponseEntity<ResponseDTO> updateReservation(@Valid @RequestBody ReservationUpdateRequestDto reservationUpdateRequestDto) {
         // TODO: 사용자 인증 필요
         reservationService.updateReservation(reservationUpdateRequestDto.toDto());
         return ResponseEntity.ok(ResponseDTO.ok());

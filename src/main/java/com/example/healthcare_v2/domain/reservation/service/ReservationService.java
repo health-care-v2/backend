@@ -44,26 +44,13 @@ public class ReservationService {
     }
 
     public void updateReservation(ReservationDto dto) {
-        Reservation reservation = reservationRepository.findById(dto.id()).get();
-        Patient patient = patientRepository.findById(dto.patientId()).get();
-
         try {
+            Reservation reservation = reservationRepository.getReferenceById(dto.id());
+            Patient patient = patientRepository.getReferenceById(dto.patientId());
+
             if (reservation.getPatient().equals(patient)) {
-                if (dto.doctorId() != null) {
-                    reservation.setDoctor(doctorRepository.getReferenceById(dto.doctorId()));
-                }
-
-                if (dto.symptom() != null) {
-                    reservation.setSymptom(dto.symptom());
-                }
-
-                if (dto.reservationDate() != null) {
-                    reservation.setReservationDate(dto.reservationDate());
-                }
-
-                if (dto.reservationTime() != null) {
-                    reservation.setReservationTime(dto.reservationTime());
-                }
+                reservation.changeReservation(dto.symptom(), dto.reservationDate(),
+                        dto.reservationTime(), doctorRepository.getReferenceById(dto.doctorId()));
             }
         } catch (EntityNotFoundException e) {
             log.warn("예약 업데이트 실패. {}", e.getLocalizedMessage());
