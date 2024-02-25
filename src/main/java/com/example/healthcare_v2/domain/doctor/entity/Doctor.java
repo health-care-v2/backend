@@ -11,11 +11,13 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
 @Getter
 public class Doctor extends BaseEntity {
 
@@ -27,8 +29,9 @@ public class Doctor extends BaseEntity {
 
     private String encryptedPassword;
 
-    @OneToOne
-    private Major major;
+    private String name;
+
+    private String major;
 
     private String phoneNumber;
 
@@ -42,4 +45,20 @@ public class Doctor extends BaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "doctor")
     private List<Reservation> reservations;
+
+    @Builder
+    public Doctor(String email, String encryptedPassword, String name, String major,
+        String phoneNumber,
+        String code, List<Connect> connects, List<Diagnosis> diagnoses,
+        List<Reservation> reservations) {
+        this.email = email;
+        this.encryptedPassword = encryptedPassword;
+        this.name = name;
+        this.major = major;
+        this.phoneNumber = phoneNumber;
+        this.code = code;
+        this.connects = connects;
+        this.diagnoses = diagnoses;
+        this.reservations = reservations;
+    }
 }
