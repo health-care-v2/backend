@@ -1,8 +1,8 @@
 package com.example.healthcare_v2.domain.patient.service;
 
-import com.example.healthcare_v2.domain.patient.controller.request.CreateUserRequest;
+import com.example.healthcare_v2.domain.patient.controller.request.CreatePatientRequest;
 import com.example.healthcare_v2.domain.patient.controller.request.LoginRequest;
-import com.example.healthcare_v2.domain.patient.controller.response.CreateUserResponse;
+import com.example.healthcare_v2.domain.patient.controller.response.CreatePatientResponse;
 import com.example.healthcare_v2.domain.patient.dto.TokenDTO;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
 import com.example.healthcare_v2.domain.patient.exception.InvalidPasswordException;
@@ -10,8 +10,6 @@ import com.example.healthcare_v2.domain.patient.exception.UserAlreadyRegisteredE
 import com.example.healthcare_v2.domain.patient.exception.UserNotFoundException;
 import com.example.healthcare_v2.domain.patient.repository.PatientRepository;
 import com.example.healthcare_v2.global.config.security.jwt.JwtProvider;
-import com.example.healthcare_v2.global.utill.ResponseDTO;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,7 @@ public class PatientService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
-    public CreateUserResponse registerNewUser(CreateUserRequest createUserRequest) {
+    public CreatePatientResponse registerNewUser(CreatePatientRequest createUserRequest) {
         patientRepository.findByEmail(createUserRequest.email()).ifPresent(user -> {
             throw new UserAlreadyRegisteredException();
         });
@@ -34,7 +32,7 @@ public class PatientService {
         Patient newUser = createUserRequest.toEntity(encodedPassword);
 
         patientRepository.save(newUser);
-        return CreateUserResponse.fromEntity(newUser);
+        return CreatePatientResponse.fromEntity(newUser);
     }
 
     public TokenDTO login(LoginRequest request) {
