@@ -27,8 +27,7 @@ public class Doctor extends BaseEntity {
 
     private String encryptedPassword;
 
-    @OneToOne
-    private Major major;
+    private String major;
 
     private String phoneNumber;
 
