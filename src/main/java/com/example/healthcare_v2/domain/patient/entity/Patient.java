@@ -35,6 +35,8 @@ public class Patient extends BaseEntity {
 
     private String name;
 
+    private LocalDate born;
+
     @Column(unique = true)
     private String phoneNumber;
 
