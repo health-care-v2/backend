@@ -61,7 +61,7 @@ public class DoctorService {
         doctorRepository.save(doctor);
     }
 
-    private static void isDeletedDoctor(Doctor doctor) {
+    private void isDeletedDoctor(Doctor doctor) {
         if (doctor.isDeleted()) {
             throw new UserNotFoundException();
         }
