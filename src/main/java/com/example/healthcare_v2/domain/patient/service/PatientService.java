@@ -24,6 +24,11 @@ public class PatientService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
+    @Transactional(readOnly = true)
+    public Patient findById(Long patientId) {
+        return patientRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
+    }
+
     public CreatePatientResponse registerNewUser(CreatePatientRequest createUserRequest) {
         patientRepository.findByEmail(createUserRequest.email()).ifPresent(user -> {
             throw new UserAlreadyRegisteredException();
@@ -39,11 +44,24 @@ public class PatientService {
         Patient patient = patientRepository.findByEmail(request.email())
             .orElseThrow(UserNotFoundException::new);
 
+        isDeletedPatient(patient);
         if (!passwordEncoder.matches(request.password(), patient.getEncryptedPassword())) {
             throw new InvalidPasswordException();
         }
 
         String accessToken = jwtProvider.createToken(patient);
         return new TokenDTO(accessToken);
+    }
+
+    public void delete(Long patientId) {
+        Patient patient = findById(patientId);
+        patient.delete();
+        patientRepository.save(patient);
+    }
+
+    private void isDeletedPatient(Patient patient) {
+        if (patient.isDeleted()) {
+            throw new UserNotFoundException();
+        }
     }
 }
