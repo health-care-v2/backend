@@ -30,7 +30,8 @@ public class SecurityConfig {
     private static final String[] ALLOWED_PATHS
         = {
         "/v2/patients/email/**", "/v2/doctors/email/**",
-        "/v2/patients/signup","/v2/patients/login"
+        "/v2/patients/signup","/v2/patients/login",
+        "/v2/doctors/signup","/v2/doctors/login"
     };
 
     private final JwtFilter jwtFilter;

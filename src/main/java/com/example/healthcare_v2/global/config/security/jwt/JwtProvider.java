@@ -1,5 +1,6 @@
 package com.example.healthcare_v2.global.config.security.jwt;
 
+import com.example.healthcare_v2.domain.doctor.entity.Doctor;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -49,6 +50,17 @@ public class JwtProvider {
 
         return Jwts.builder()
             .setSubject(String.valueOf(patient.getId()))
+            .signWith(key, SignatureAlgorithm.HS512)
+            .setExpiration(validity)
+            .compact();
+    }
+
+    public String createToken(Doctor doctor) {
+        long now = (new Date()).getTime();
+        Date validity = new Date(now + this.tokenValidityInMilliseconds);
+
+        return Jwts.builder()
+            .setSubject(String.valueOf(doctor.getId()))
             .signWith(key, SignatureAlgorithm.HS512)
             .setExpiration(validity)
             .compact();
