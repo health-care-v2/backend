@@ -13,14 +13,15 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.List;
+import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 public class Patient extends BaseEntity {
 
@@ -44,7 +45,7 @@ public class Patient extends BaseEntity {
 
     private String addr2;
 
-    @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE,mappedBy = "patient")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "patient")
     private List<Connect> connects;
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "patient")
@@ -66,15 +67,4 @@ public class Patient extends BaseEntity {
         this.addr1 = addr1;
         this.addr2 = addr2;
     }
-
-    @Override
-    public void restore() {
-        super.restore();
-    }
-
-    @Override
-    public void delete(LocalDateTime currentTime) {
-        super.delete(currentTime);
-    }
-
 }
