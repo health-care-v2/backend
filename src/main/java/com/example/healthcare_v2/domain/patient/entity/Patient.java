@@ -13,12 +13,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
-
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
 @Getter
 public class Patient extends BaseEntity {
 
@@ -53,4 +55,26 @@ public class Patient extends BaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "patient")
     private List<Diagnosis> Diagnoses;
+
+    @Builder
+    public Patient(String email, String encryptedPassword, String name, String phoneNumber,
+        String addr1, String addr2) {
+        this.email = email;
+        this.encryptedPassword = encryptedPassword;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.addr1 = addr1;
+        this.addr2 = addr2;
+    }
+
+    @Override
+    public void restore() {
+        super.restore();
+    }
+
+    @Override
+    public void delete(LocalDateTime currentTime) {
+        super.delete(currentTime);
+    }
+
 }

@@ -18,4 +18,9 @@ spring:
       hibernate.default_batch_fetch_size: 100
   sql.init.mode: always
 
+jwt:
+  secret: c2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQtc2lsdmVybmluZS10ZWNoLXNwcmluZy1ib290LWp3dC10dXRvcmlhbC1zZWNyZXQK
+  token-validity-in-seconds: 86400
 
+cookie:
+  domain: localhost
