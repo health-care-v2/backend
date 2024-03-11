@@ -16,8 +16,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -115,5 +114,16 @@ public class DiaryControllerTest {
                                 + "\"isPublic\":true"
                                 + "}")
         ).andExpect(status().is4xxClientError());
+    }
+
+    @DisplayName("일기 삭제_같은 유저")
+    @Test
+    @WithMockUser(username = "17")
+    void deleteDiary_같은유저() throws Exception {
+        Long diaryId = 2L;
+
+        mockMvc.perform(
+                delete("/v2/diaries/{diaryId}",diaryId)
+        ).andExpect(status().isOk());
     }
 }
