@@ -58,4 +58,16 @@ public class Diary extends BaseEntity {
         this.likeCount = likeCount;
         this.patient = patient;
     }
+
+    public void update(Diary updateDiary){
+        this.title = updateDiary.title;
+        this.isWalk = updateDiary.isWalk;
+        this.isStretching = updateDiary.isStretching;
+        this.takeMedicine = updateDiary.takeMedicine;
+        this.status = updateDiary.status;
+        this.content = updateDiary.content;
+        this.isPublic = updateDiary.isPublic;
+        this.likeCount = updateDiary.likeCount;
+        this.patient = updateDiary.patient;
+    }
 }

@@ -17,6 +17,7 @@ import org.springframework.web.context.WebApplicationContext;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -72,5 +73,47 @@ public class DiaryControllerTest {
     void postDiary_인증없음() throws Exception {
         mockMvc.perform(post("/v2/diaries"))
                 .andExpect(status().is4xxClientError());
+    }
+
+    @DisplayName("일기 수정_동일유저")
+    @Test
+    @WithMockUser(username = "17")
+    void updateDiary_동일유저() throws Exception {
+        Long diaryId=2L;
+
+        mockMvc.perform(
+                put("/v2/diaries/{diaryId}",diaryId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{"
+                                + "\"title\":\"제목\","
+                                + "\"isWalk\":true,"
+                                + "\"isStretching\":true,"
+                                + "\"takeMedicine\":\"아침,점심,저녁\","
+                                + "\"status\":4.33,"
+                                + "\"content\":\"배가아프다\","
+                                + "\"isPublic\":true"
+                                + "}")
+        ).andExpect(status().isOk());
+    }
+
+    @DisplayName("일기 수정_다른 유저")
+    @Test
+    @WithMockUser(username = "18")
+    void updateDiary_다른유저() throws Exception {
+        Long diaryId=2L;
+
+        mockMvc.perform(
+                put("/v2/diaries/{diaryId}",diaryId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("{"
+                                + "\"title\":\"제목\","
+                                + "\"isWalk\":true,"
+                                + "\"isStretching\":true,"
+                                + "\"takeMedicine\":\"아침,점심,저녁\","
+                                + "\"status\":4.33,"
+                                + "\"content\":\"배가아프다\","
+                                + "\"isPublic\":true"
+                                + "}")
+        ).andExpect(status().is4xxClientError());
     }
 }

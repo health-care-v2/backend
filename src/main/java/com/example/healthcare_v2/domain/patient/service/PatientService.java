@@ -29,6 +29,13 @@ public class PatientService {
         return patientRepository.findById(patientId).orElseThrow(UserNotFoundException::new);
     }
 
+    @Transactional(readOnly = true)
+    public Patient findActivePatientById(Long patientId) {
+        Patient patient = findById(patientId);
+        isDeletedPatient(patient);
+        return patient;
+    }
+
     public CreatePatientResponse registerNewUser(CreatePatientRequest createUserRequest) {
         patientRepository.findByEmail(createUserRequest.email()).ifPresent(user -> {
             throw new UserAlreadyRegisteredException();
@@ -42,7 +49,7 @@ public class PatientService {
 
     public TokenDTO login(LoginRequest request) {
         Patient patient = patientRepository.findByEmail(request.email())
-            .orElseThrow(UserNotFoundException::new);
+                .orElseThrow(UserNotFoundException::new);
 
         isDeletedPatient(patient);
         if (!passwordEncoder.matches(request.password(), patient.getEncryptedPassword())) {

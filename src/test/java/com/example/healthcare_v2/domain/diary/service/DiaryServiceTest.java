@@ -1,6 +1,7 @@
 package com.example.healthcare_v2.domain.diary.service;
 
 import com.example.healthcare_v2.domain.diary.controller.request.CreateDiaryRequest;
+import com.example.healthcare_v2.domain.diary.controller.request.UpdateDiaryRequest;
 import com.example.healthcare_v2.domain.diary.entity.Diary;
 import com.example.healthcare_v2.domain.diary.repository.DiaryRepository;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
@@ -12,6 +13,10 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
@@ -56,5 +61,50 @@ public class DiaryServiceTest {
 
         // then
         verify(diaryRepository,atLeastOnce()).save(any(Diary.class));
+    }
+
+    @DisplayName("일기 수정")
+    @Test
+    void updateDiary(){
+        // given
+        Long userId = -1L;
+        Long diaryId = 2L;
+
+        Patient patient = Patient.builder()
+                .email("test@naver.com")
+                .name("test1")
+                .encryptedPassword("password")
+                .build();
+
+        Diary diary = Diary.builder()
+                .title("제목")
+                .status(4.33f)
+                .content("내용")
+                .takeMedicine("아침,점심")
+                .isWalk(true)
+                .isStretching(true)
+                .isPublic(false)
+                .patient(patient)
+                .likeCount(0L)
+                .build();
+
+        UpdateDiaryRequest request = new UpdateDiaryRequest(
+                "제목 update",
+                true,
+                false,
+                "아침,점심,저녁",
+                4.33f,
+                "복통",
+                true
+        );
+
+        given(patientService.findActivePatientById(userId)).willReturn(patient);
+        given(diaryRepository.findById(diaryId)).willReturn(Optional.ofNullable(diary));
+
+        // when
+        diaryService.update(request,userId,diaryId);
+
+        // then
+        assertThat(diary.getTitle()).isEqualTo("제목 update");
     }
 }
