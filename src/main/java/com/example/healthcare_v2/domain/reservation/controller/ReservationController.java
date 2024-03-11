@@ -1,5 +1,6 @@
 package com.example.healthcare_v2.domain.reservation.controller;
 
+import com.example.healthcare_v2.domain.reservation.dto.PatientDto;
 import com.example.healthcare_v2.domain.reservation.dto.request.ReservationRequestDto;
 import com.example.healthcare_v2.domain.reservation.dto.request.ReservationUpdateRequestDto;
 import com.example.healthcare_v2.domain.reservation.dto.response.ReservationResponseDto;
@@ -13,6 +14,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.security.Principal;
 
 @RequiredArgsConstructor
 @RequestMapping("/v2/reservations")
@@ -43,8 +46,11 @@ public class ReservationController {
      * 예약하기
      */
     @PostMapping
-    public ResponseEntity<ResponseDTO> createNewReservation(@RequestBody ReservationRequestDto reservationRequestDto) {
-        reservationService.saveReservation(reservationRequestDto.toDto());
+    public ResponseEntity<ResponseDTO> createNewReservation(
+            @RequestBody ReservationRequestDto reservationRequestDto,
+            Principal principal) {
+        Long userId = Long.valueOf(principal.getName());
+        reservationService.saveReservation(reservationRequestDto.toDto(PatientDto.of(userId)));
         return ResponseEntity.ok(ResponseDTO.ok());
     }
 
@@ -52,9 +58,11 @@ public class ReservationController {
      * 예약 변경
      */
     @PutMapping
-    public ResponseEntity<ResponseDTO> updateReservation(@Valid @RequestBody ReservationUpdateRequestDto reservationUpdateRequestDto) {
-        // TODO: 사용자 인증 필요
-        reservationService.updateReservation(reservationUpdateRequestDto.toDto());
+    public ResponseEntity<ResponseDTO> updateReservation(
+            @Valid @RequestBody ReservationUpdateRequestDto reservationUpdateRequestDto,
+            Principal principal) {
+        Long userId = Long.valueOf(principal.getName());
+        reservationService.updateReservation(reservationUpdateRequestDto.toDto(PatientDto.of(userId)));
         return ResponseEntity.ok(ResponseDTO.ok());
     }
 
@@ -62,9 +70,12 @@ public class ReservationController {
      * 예약 취소
      */
     @DeleteMapping("/{reservationId}")
-    public ResponseEntity<ResponseDTO> deleteReservation(@PathVariable(name = "reservationId") Long reservationId) {
-        // TODO: 사용자 인증 필요
-        reservationService.cancelReservation(reservationId);
+    public ResponseEntity<ResponseDTO> deleteReservation(
+            @PathVariable(name = "reservationId") Long reservationId,
+            Principal principal
+    ) {
+        Long userId = Long.valueOf(principal.getName());
+        reservationService.cancelReservation(reservationId, userId);
         return ResponseEntity.ok(ResponseDTO.ok());
     }
 

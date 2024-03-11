@@ -26,8 +26,8 @@ public class ReservationService {
     private final DoctorRepository doctorRepository;
 
     public void saveReservation(ReservationDto dto) {
-        Patient patient = patientRepository.getReferenceById(dto.patientId());
-        Doctor doctor = doctorRepository.getReferenceById(dto.doctorId());
+        Patient patient = patientRepository.getReferenceById(dto.patientDto().id());
+        Doctor doctor = doctorRepository.getReferenceById(dto.doctorDto().id());
         reservationRepository.save(dto.toEntity(patient, doctor));
     }
 
@@ -46,18 +46,21 @@ public class ReservationService {
     public void updateReservation(ReservationDto dto) {
         try {
             Reservation reservation = reservationRepository.getReferenceById(dto.id());
-            Patient patient = patientRepository.getReferenceById(dto.patientId());
+            Patient patient = patientRepository.getReferenceById(dto.patientDto().id());
+
+            log.info("reservation = {} ", reservation.getPatient().getId());
+            log.info("patient = {}, ", patient.getId());
 
             if (reservation.getPatient().equals(patient)) {
                 reservation.changeReservation(dto.symptom(), dto.reservationDate(),
-                        dto.reservationTime(), doctorRepository.getReferenceById(dto.doctorId()));
+                        dto.reservationTime(), doctorRepository.getReferenceById(dto.doctorDto().id()));
             }
         } catch (EntityNotFoundException e) {
             log.warn("예약 업데이트 실패. {}", e.getLocalizedMessage());
         }
     }
 
-    public void cancelReservation(Long reservationId) {
-        reservationRepository.deleteById(reservationId);
+    public void cancelReservation(Long reservationId, Long patientId) {
+        reservationRepository.deleteByIdAndPatient_Id(reservationId, patientId);
     }
 }
