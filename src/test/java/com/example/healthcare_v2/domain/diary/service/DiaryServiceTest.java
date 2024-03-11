@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.atLeastOnce;
@@ -68,7 +69,7 @@ public class DiaryServiceTest {
     void updateDiary(){
         // given
         Long userId = -1L;
-        Long diaryId = 2L;
+        Long diaryId = -1L;
 
         Patient patient = Patient.builder()
                 .email("test@naver.com")
@@ -106,5 +107,38 @@ public class DiaryServiceTest {
 
         // then
         assertThat(diary.getTitle()).isEqualTo("제목 update");
+    }
+
+    @DisplayName("일기 삭제")
+    @Test
+    void deleteDiary(){
+        // given
+        Long userId = -1L;
+        Long diaryId = -1L;
+
+        Patient patient = Patient.builder()
+                .email("test@naver.com")
+                .name("test1")
+                .encryptedPassword("password")
+                .build();
+
+        Diary diary = Diary.builder()
+                .title("제목")
+                .status(4.33f)
+                .content("내용")
+                .takeMedicine("아침,점심")
+                .isWalk(true)
+                .isStretching(true)
+                .isPublic(false)
+                .patient(patient)
+                .likeCount(0L)
+                .build();
+
+        given(patientService.findActivePatientById(userId)).willReturn(patient);
+        given(diaryRepository.findById(diaryId)).willReturn(Optional.ofNullable(diary));
+
+        // when, then
+        assertThatNoException()
+                .isThrownBy(()->diaryService.delete(diaryId,userId));
     }
 }
