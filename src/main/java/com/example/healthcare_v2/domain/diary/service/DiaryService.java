@@ -34,10 +34,19 @@ public class DiaryService {
     public void update(UpdateDiaryRequest request, Long userId, Long diaryId) {
         Patient patient = patientService.findActivePatientById(userId);
         Diary diary = findById(diaryId);
-
         if (!diary.getPatient().equals(patient)) {
             throw new UserNotMatchException();
         }
         diary.update(request.toEntity(patient));
+    }
+
+    public void delete(Long diaryId, Long userId) {
+        Patient patient = patientService.findActivePatientById(userId);
+        Diary diary = findById(diaryId);
+        if (!diary.getPatient().equals(patient)) {
+            throw new UserNotMatchException();
+        }
+        diary.delete();
+        diaryRepository.save(diary);
     }
 }

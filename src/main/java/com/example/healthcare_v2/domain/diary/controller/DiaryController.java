@@ -38,4 +38,14 @@ public class DiaryController {
         diaryService.update(request, userId, diaryId);
         return ResponseEntity.ok(ResponseDTO.ok());
     }
+
+    @DeleteMapping("/{diaryId}")
+    public ResponseEntity<ResponseDTO<Void>> delete(
+            @PathVariable Long diaryId,
+            Principal principal
+    ){
+        Long userId = Long.valueOf(principal.getName());
+        diaryService.delete(diaryId,userId);
+        return ResponseEntity.ok(ResponseDTO.ok());
+    }
 }
