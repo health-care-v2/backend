@@ -15,6 +15,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -66,5 +68,17 @@ public class Patient extends BaseEntity {
         this.phoneNumber = phoneNumber;
         this.addr1 = addr1;
         this.addr2 = addr2;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Patient that)) return false;
+        return this.getId() != null && this.getId().equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.getId());
     }
 }
