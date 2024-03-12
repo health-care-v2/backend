@@ -126,4 +126,13 @@ public class DiaryControllerTest {
                 delete("/v2/diaries/{diaryId}",diaryId)
         ).andExpect(status().isOk());
     }
+
+    @DisplayName("일기 public조회")
+    @Test
+    @WithMockUser(username = "17")
+    void readPublicDiary() throws Exception {
+        mockMvc.perform(
+                get("/v2/diaries")
+        ).andExpect(status().isOk());
+    }
 }
