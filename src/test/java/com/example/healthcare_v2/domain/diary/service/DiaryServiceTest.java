@@ -2,6 +2,7 @@ package com.example.healthcare_v2.domain.diary.service;
 
 import com.example.healthcare_v2.domain.diary.controller.request.CreateDiaryRequest;
 import com.example.healthcare_v2.domain.diary.controller.request.UpdateDiaryRequest;
+import com.example.healthcare_v2.domain.diary.controller.response.DiaryResponse;
 import com.example.healthcare_v2.domain.diary.entity.Diary;
 import com.example.healthcare_v2.domain.diary.repository.DiaryRepository;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
@@ -14,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -58,15 +60,15 @@ public class DiaryServiceTest {
         given(patientService.findById(userId)).willReturn(patient);
 
         // when
-        diaryService.create(request,userId);
+        diaryService.create(request, userId);
 
         // then
-        verify(diaryRepository,atLeastOnce()).save(any(Diary.class));
+        verify(diaryRepository, atLeastOnce()).save(any(Diary.class));
     }
 
     @DisplayName("일기 수정")
     @Test
-    void updateDiary(){
+    void updateDiary() {
         // given
         Long userId = -1L;
         Long diaryId = -1L;
@@ -103,7 +105,7 @@ public class DiaryServiceTest {
         given(diaryRepository.findById(diaryId)).willReturn(Optional.ofNullable(diary));
 
         // when
-        diaryService.update(request,userId,diaryId);
+        diaryService.update(request, userId, diaryId);
 
         // then
         assertThat(diary.getTitle()).isEqualTo("제목 update");
@@ -111,7 +113,7 @@ public class DiaryServiceTest {
 
     @DisplayName("일기 삭제")
     @Test
-    void deleteDiary(){
+    void deleteDiary() {
         // given
         Long userId = -1L;
         Long diaryId = -1L;
@@ -139,6 +141,27 @@ public class DiaryServiceTest {
 
         // when, then
         assertThatNoException()
-                .isThrownBy(()->diaryService.delete(diaryId,userId));
+                .isThrownBy(() -> diaryService.delete(diaryId, userId));
+    }
+
+    @DisplayName("일기 조회_public")
+    @Test
+    void readPublicDiary() {
+        // given
+        Long userId = -1L;
+
+        Patient patient = Patient.builder()
+                .email("test@naver.com")
+                .name("test1")
+                .encryptedPassword("password")
+                .build();
+
+        given(patientService.findActivePatientById(userId)).willReturn(patient);
+
+        // when
+        List<DiaryResponse> diaryResponses = diaryService.readOnlyPublic(userId);
+
+        // then
+        assertThat(diaryResponses).allMatch(diaryResponse -> Boolean.TRUE.equals(diaryResponse.isPublic()));
     }
 }
