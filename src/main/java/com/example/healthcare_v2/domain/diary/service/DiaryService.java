@@ -29,6 +29,13 @@ public class DiaryService {
                 .orElseThrow(DiaryNotFoundException::new);
     }
 
+    @Transactional(readOnly = true)
+    public Diary findActiveDiaryById(Long diaryId) {
+        Diary diary = findById(diaryId);
+        isDeletedDiary(diary);
+        return diary;
+    }
+
     public void create(CreateDiaryRequest request, Long userId) {
         Patient patient = patientService.findById(userId);
         diaryRepository.save(request.toEntity(patient));
@@ -58,5 +65,11 @@ public class DiaryService {
         patientService.findActivePatientById(userId);
         List<Diary> diaries = diaryRepository.findByIsPublicTrue();
         return DiaryResponse.fromEntities(diaries);
+    }
+
+    private void isDeletedDiary(Diary diary){
+        if(diary.isDeleted()){
+            throw new DiaryNotFoundException();
+        }
     }
 }
