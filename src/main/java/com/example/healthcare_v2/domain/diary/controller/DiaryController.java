@@ -2,6 +2,7 @@ package com.example.healthcare_v2.domain.diary.controller;
 
 import com.example.healthcare_v2.domain.diary.controller.request.CreateDiaryRequest;
 import com.example.healthcare_v2.domain.diary.controller.request.UpdateDiaryRequest;
+import com.example.healthcare_v2.domain.diary.controller.response.DiaryResponse;
 import com.example.healthcare_v2.domain.diary.service.DiaryService;
 import com.example.healthcare_v2.global.utill.ResponseDTO;
 import jakarta.validation.Valid;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/v2/diaries")
@@ -17,6 +19,16 @@ import java.security.Principal;
 public class DiaryController {
 
     private final DiaryService diaryService;
+
+    @GetMapping
+    public ResponseEntity<ResponseDTO<List<DiaryResponse>>> readOnlyPublic(
+            Principal principal
+    ) {
+        Long userId = Long.valueOf(principal.getName());
+        return ResponseEntity.ok(
+                ResponseDTO.okWithData(diaryService.readOnlyPublic(userId))
+        );
+    }
 
     @PostMapping
     public ResponseEntity<ResponseDTO<Void>> create(
@@ -43,9 +55,9 @@ public class DiaryController {
     public ResponseEntity<ResponseDTO<Void>> delete(
             @PathVariable Long diaryId,
             Principal principal
-    ){
+    ) {
         Long userId = Long.valueOf(principal.getName());
-        diaryService.delete(diaryId,userId);
+        diaryService.delete(diaryId, userId);
         return ResponseEntity.ok(ResponseDTO.ok());
     }
 }

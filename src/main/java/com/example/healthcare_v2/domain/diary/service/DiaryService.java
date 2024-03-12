@@ -2,6 +2,7 @@ package com.example.healthcare_v2.domain.diary.service;
 
 import com.example.healthcare_v2.domain.diary.controller.request.CreateDiaryRequest;
 import com.example.healthcare_v2.domain.diary.controller.request.UpdateDiaryRequest;
+import com.example.healthcare_v2.domain.diary.controller.response.DiaryResponse;
 import com.example.healthcare_v2.domain.diary.entity.Diary;
 import com.example.healthcare_v2.domain.diary.exception.DiaryNotFoundException;
 import com.example.healthcare_v2.domain.diary.exception.UserNotMatchException;
@@ -11,6 +12,8 @@ import com.example.healthcare_v2.domain.patient.service.PatientService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -48,5 +51,12 @@ public class DiaryService {
         }
         diary.delete();
         diaryRepository.save(diary);
+    }
+
+    @Transactional(readOnly = true)
+    public List<DiaryResponse> readOnlyPublic(Long userId) {
+        patientService.findActivePatientById(userId);
+        List<Diary> diaries = diaryRepository.findByIsPublicTrue();
+        return DiaryResponse.fromEntities(diaries);
     }
 }
