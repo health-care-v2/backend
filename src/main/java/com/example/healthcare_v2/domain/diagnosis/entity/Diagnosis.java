@@ -15,11 +15,16 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import java.util.List;
-import lombok.Getter;
 
-@Entity
+import java.util.List;
+
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 public class Diagnosis extends BaseEntity {
 
     @Id
@@ -35,7 +40,7 @@ public class Diagnosis extends BaseEntity {
     @JoinColumn(name = "diagnosis_id")
     private List<DiagnosisImage> images;
 
-    @OneToMany(fetch = FetchType.LAZY,cascade = CascadeType.REMOVE,mappedBy = "diagnosis")
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "diagnosis")
     private List<Prescription> prescriptions;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -45,5 +50,16 @@ public class Diagnosis extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "patient_id")
     private Patient patient;
+
+    private Diagnosis(String disease, String content, Doctor doctor, Patient patient) {
+        this.disease = disease;
+        this.content = content;
+        this.doctor = doctor;
+        this.patient = patient;
+    }
+
+    public static Diagnosis of(String disease, String content, Doctor doctor, Patient patient) {
+        return new Diagnosis(disease, content, doctor, patient);
+    }
 
 }
