@@ -15,12 +15,10 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
+@ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Reservation extends BaseEntity {
