@@ -57,12 +57,13 @@ public class ReservationController {
     /**
      * 예약 변경
      */
-    @PutMapping
+    @PutMapping("{reservationId}")
     public ResponseEntity<ResponseDTO> updateReservation(
+            @PathVariable(name = "reservationId") Long reservationId,
             @Valid @RequestBody ReservationUpdateRequestDto reservationUpdateRequestDto,
             Principal principal) {
         Long userId = Long.valueOf(principal.getName());
-        reservationService.updateReservation(reservationUpdateRequestDto.toDto(PatientDto.of(userId)));
+        reservationService.updateReservation(reservationUpdateRequestDto.toDto(reservationId, PatientDto.of(userId)));
         return ResponseEntity.ok(ResponseDTO.ok());
     }
 

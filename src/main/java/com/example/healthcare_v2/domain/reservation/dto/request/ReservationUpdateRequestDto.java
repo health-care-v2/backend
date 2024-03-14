@@ -9,12 +9,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record ReservationUpdateRequestDto(
-        @NotNull Long id,
         @NotNull String symptom,
         @NotNull LocalDate reservationDate,
         @NotNull LocalTime reservationTime,
         @NotNull Long doctorId) {
-    public ReservationDto toDto(PatientDto patientDto) {
-        return ReservationDto.of(id, symptom, reservationDate, reservationTime, patientDto, DoctorDto.of(doctorId));
+    public ReservationDto toDto(Long ReservationId, PatientDto patientDto) {
+        return ReservationDto.of(ReservationId, symptom, reservationDate, reservationTime, patientDto, DoctorDto.of(doctorId));
     }
 }

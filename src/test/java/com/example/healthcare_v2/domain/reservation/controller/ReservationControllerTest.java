@@ -127,12 +127,13 @@ class ReservationControllerTest {
     void givenUpdateReservationInfo_whenUpdateReservation_thenReturns200() throws Exception {
         // given
         Long patientId = 1L;
+        Long reservationId = 1L;
         ReservationUpdateRequestDto reservationUpdateRequestDto = createReservationUpdateRequestDto();
-        ReservationDto reservationDto = reservationUpdateRequestDto.toDto(PatientDto.of(patientId));
+        ReservationDto reservationDto = reservationUpdateRequestDto.toDto(reservationId, PatientDto.of(patientId));
         willDoNothing().given(reservationService).updateReservation(reservationDto);
 
         // when & then
-        mvc.perform(put("/v2/reservations")
+        mvc.perform(put("/v2/reservations/" + reservationId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonDataEncoder.encode(reservationUpdateRequestDto)))
                 .andExpect(status().isOk())
@@ -164,7 +165,6 @@ class ReservationControllerTest {
 
     private ReservationUpdateRequestDto createReservationUpdateRequestDto() {
         return new ReservationUpdateRequestDto(
-                1L,
                 "아파 업데이트",
                 LocalDate.of(2024, 02, 18),
                 LocalTime.of(18, 00, 20),
