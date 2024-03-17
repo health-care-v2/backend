@@ -70,6 +70,24 @@ class DiagnosisControllerTest {
         then(diagnosisService).should().getDiagnoses(any(Pageable.class));
     }
 
+    @WithMockUser(username = "1")
+    @DisplayName("환자 id로 진료 조회")
+    @Test
+    void givenPatientId_whenGetDiagnosesByPatient_thenReturns200() throws Exception {
+        // given
+        Long patientId = 1L;
+        given(diagnosisService.getDiagnosesByPatient(any(Pageable.class), eq(patientId))).willReturn(Page.empty());
+
+        // when & then
+        mvc.perform(get("/v2/diagnosis/" + patientId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data").hasJsonPath())
+                .andExpect(jsonPath("message").isEmpty()
+                );
+        then(diagnosisService).should().getDiagnosesByPatient(any(Pageable.class), eq(patientId));
+    }
+
     private DiagnosisRequestDto createDiagnosisRequestDto() {
         return new DiagnosisRequestDto(
                 "질병1",
