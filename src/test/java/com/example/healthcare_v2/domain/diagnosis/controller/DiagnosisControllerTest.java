@@ -11,12 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 
-import static org.mockito.BDDMockito.then;
-import static org.mockito.BDDMockito.willDoNothing;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -48,6 +51,23 @@ class DiagnosisControllerTest {
                 .andExpect(jsonPath("message").isEmpty()
                 );
         then(diagnosisService).should().saveDiagnosis(diagnosisDto);
+    }
+
+    @WithMockUser(username = "1")
+    @DisplayName("진료 전체 조회")
+    @Test
+    void givenNoting_whenGetDiagnoses_thenReturns200() throws Exception {
+        // given
+        given(diagnosisService.getDiagnoses(any(Pageable.class))).willReturn(Page.empty());
+
+        // when & then
+        mvc.perform(get("/v2/diagnosis"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data").hasJsonPath())
+                .andExpect(jsonPath("message").isEmpty()
+                );
+        then(diagnosisService).should().getDiagnoses(any(Pageable.class));
     }
 
     private DiagnosisRequestDto createDiagnosisRequestDto() {
