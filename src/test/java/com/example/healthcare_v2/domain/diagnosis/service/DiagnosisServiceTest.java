@@ -67,6 +67,22 @@ class DiagnosisServiceTest {
         then(diagnosisRepository).should().findAll(pageable);
     }
 
+    @DisplayName("환자 id로 진료를 조회하면, 페이징 된 환자 id에 해당되는 진료정보들을 반환한다.")
+    @Test
+    void givenPageInfoAndPatientId_whenSearchingDiagnosesByPatient_thenDiagnoses() {
+        // Given
+        Long patientId = 1L;
+        Pageable pageable = Pageable.ofSize(10);
+        given(diagnosisRepository.findByPatient_id(pageable, patientId)).willReturn(Page.empty());
+
+        // When
+        Page<DiagnosisDto> diagnosis = sut.getDiagnosesByPatient(pageable, patientId);
+
+        // Then
+        assertThat(diagnosis).isEqualTo(Page.empty());
+        then(diagnosisRepository).should().findByPatient_id(pageable, patientId);
+    }
+
     private DiagnosisDto createDiagnosisDto() {
         return DiagnosisDto.of(
                 "질병1",
