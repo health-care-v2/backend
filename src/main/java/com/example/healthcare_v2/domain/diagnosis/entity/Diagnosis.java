@@ -4,23 +4,13 @@ import com.example.healthcare_v2.domain.doctor.entity.Doctor;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
 import com.example.healthcare_v2.domain.prescription.entity.Prescription;
 import com.example.healthcare_v2.global.common.BaseEntity;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-
-import java.util.List;
-
+import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -38,10 +28,10 @@ public class Diagnosis extends BaseEntity {
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     @JoinColumn(name = "diagnosis_id")
-    private List<DiagnosisImage> images;
+    private List<DiagnosisImage> images = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, mappedBy = "diagnosis")
-    private List<Prescription> prescriptions;
+    private List<Prescription> prescriptions = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "doctor_id")

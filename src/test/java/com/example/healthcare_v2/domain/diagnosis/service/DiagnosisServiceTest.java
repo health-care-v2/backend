@@ -9,16 +9,17 @@ import com.example.healthcare_v2.domain.doctor.entity.Doctor;
 import com.example.healthcare_v2.domain.doctor.repository.DoctorRepository;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
 import com.example.healthcare_v2.domain.patient.repository.PatientRepository;
-import com.example.healthcare_v2.domain.reservation.dto.ReservationDto;
-import com.example.healthcare_v2.domain.reservation.entity.Reservation;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -49,6 +50,21 @@ class DiagnosisServiceTest {
         then(patientRepository).should().getReferenceById(dto.patientDto().id());
         then(doctorRepository).should().getReferenceById(dto.doctorDto().id());
         then(diagnosisRepository).should().save(any(Diagnosis.class));
+    }
+
+    @DisplayName("모든 진료를 조회하면, 페이징된 진료정보들을 반환한다.")
+    @Test
+    void givenPageInfo_whenSearchingDiagnoses_thenDiagnoses() {
+        // Given
+        Pageable pageable = Pageable.ofSize(10);
+        given(diagnosisRepository.findAll(pageable)).willReturn(Page.empty());
+
+        // When
+        Page<DiagnosisDto> diagnosis = sut.getDiagnoses(pageable);
+
+        // Then
+        assertThat(diagnosis).isEqualTo(Page.empty());
+        then(diagnosisRepository).should().findAll(pageable);
     }
 
     private DiagnosisDto createDiagnosisDto() {

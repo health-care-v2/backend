@@ -1,14 +1,16 @@
 package com.example.healthcare_v2.domain.diagnosis.controller;
 
 import com.example.healthcare_v2.domain.diagnosis.dto.request.DiagnosisRequestDto;
+import com.example.healthcare_v2.domain.diagnosis.dto.response.DiagnosisResponseDto;
 import com.example.healthcare_v2.domain.diagnosis.service.DiagnosisService;
 import com.example.healthcare_v2.global.utill.ResponseDTO;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 
@@ -25,4 +27,12 @@ public class DiagnosisController {
         diagnosisService.saveDiagnosis(diagnosisRequestDto.toDto());
         return ResponseEntity.ok(ResponseDTO.ok());
     }
+
+    @GetMapping
+    public ResponseEntity<ResponseDTO<Page<DiagnosisResponseDto>>> diagnoses(
+            @PageableDefault(size = 10, sort = {"id"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<DiagnosisResponseDto> diagnosis = diagnosisService.getDiagnoses(pageable).map(DiagnosisResponseDto::from);
+        return ResponseEntity.ok(ResponseDTO.okWithData(diagnosis));
+    }
+
 }

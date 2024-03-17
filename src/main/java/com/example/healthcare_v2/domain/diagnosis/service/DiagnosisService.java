@@ -7,9 +7,13 @@ import com.example.healthcare_v2.domain.doctor.repository.DoctorRepository;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
 import com.example.healthcare_v2.domain.patient.repository.PatientRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @RequiredArgsConstructor
+@Transactional
 @Service
 public class DiagnosisService {
     private final DiagnosisRepository diagnosisRepository;
@@ -20,5 +24,9 @@ public class DiagnosisService {
         Doctor doctor = doctorRepository.getReferenceById(dto.doctorDto().id());
         Patient patient = patientRepository.getReferenceById(dto.patientDto().id());
         diagnosisRepository.save(dto.toEntity(patient, doctor));
+    }
+
+    public Page<DiagnosisDto> getDiagnoses(Pageable pageable) {
+        return diagnosisRepository.findAll(pageable).map(DiagnosisDto::from);
     }
 }
