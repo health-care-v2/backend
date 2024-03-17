@@ -35,4 +35,12 @@ public class DiagnosisController {
         return ResponseEntity.ok(ResponseDTO.okWithData(diagnosis));
     }
 
+    @GetMapping("/{patientId}")
+    public ResponseEntity<ResponseDTO<Page<DiagnosisResponseDto>>> diagnosis(
+            @PathVariable("patientId") Long patientId,
+            @PageableDefault(size = 10, sort = {"id"}, direction = Sort.Direction.ASC) Pageable pageable) {
+        Page<DiagnosisResponseDto> diagnosis = diagnosisService.getDiagnosesByPatient(pageable, patientId).map(DiagnosisResponseDto::from);
+        return ResponseEntity.ok(ResponseDTO.okWithData(diagnosis));
+    }
+
 }

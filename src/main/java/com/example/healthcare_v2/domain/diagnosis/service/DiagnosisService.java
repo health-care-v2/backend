@@ -29,4 +29,9 @@ public class DiagnosisService {
     public Page<DiagnosisDto> getDiagnoses(Pageable pageable) {
         return diagnosisRepository.findAll(pageable).map(DiagnosisDto::from);
     }
+
+    public Page<DiagnosisDto> getDiagnosesByPatient(Pageable pageable, Long patientId) {
+        return diagnosisRepository.findByPatient_id(pageable, patientId).map(DiagnosisDto::from);
+    }
+
 }
