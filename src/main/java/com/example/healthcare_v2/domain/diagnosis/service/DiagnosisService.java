@@ -52,4 +52,8 @@ public class DiagnosisService {
         }
     }
 
+    public void deleteDiagnosis(Long diagnosisId) {
+        diagnosisRepository.deleteById(diagnosisId);
+    }
+
 }

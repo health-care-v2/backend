@@ -52,4 +52,10 @@ public class DiagnosisController {
         return ResponseEntity.ok(ResponseDTO.ok());
     }
 
+    @DeleteMapping("/{diagnosisId}")
+    public ResponseEntity<ResponseDTO<Void>> deleteDiagnosis(@PathVariable("diagnosisId") Long diagnosisId) {
+        diagnosisService.deleteDiagnosis(diagnosisId);
+        return ResponseEntity.ok(ResponseDTO.ok());
+    }
+
 }
