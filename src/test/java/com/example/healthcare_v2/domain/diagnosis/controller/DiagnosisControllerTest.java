@@ -110,6 +110,24 @@ class DiagnosisControllerTest {
         then(diagnosisService).should().updateDiagnosis(diagnosisDto);
     }
 
+    @WithMockUser(username = "1")
+    @DisplayName("진료 삭제")
+    @Test
+    void givenDiagnosisId_whenDeleteReservation_thenReturns200() throws Exception {
+        // given
+        Long diagnosisId = 1L;
+        willDoNothing().given(diagnosisService).deleteDiagnosis(diagnosisId);
+
+        // when & then
+        mvc.perform(delete("/v2/diagnosis/" + diagnosisId))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("message").isEmpty()
+                );
+        then(diagnosisService).should().deleteDiagnosis(diagnosisId);
+    }
+
     private DiagnosisUpdateRequestDto createDiagnosisUpdateRequestDto() {
         return new DiagnosisUpdateRequestDto(
                 "질병변경1",

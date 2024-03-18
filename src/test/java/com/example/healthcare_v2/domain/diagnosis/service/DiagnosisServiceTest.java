@@ -126,6 +126,19 @@ class DiagnosisServiceTest {
         then(doctorRepository).shouldHaveNoInteractions();
     }
 
+    @DisplayName("삭제할 진료 id를 주면, 해당 진료를 삭제한다.")
+    @Test
+    void givenDiagnosisId_whenDeleteDiagnosis_thenDeletedDiagnosis() {
+        // Given
+        Long diagnosis = 1L;
+
+        // When
+        sut.deleteDiagnosis(diagnosis);
+
+        // Then
+        then(diagnosisRepository).should().deleteById(diagnosis);
+    }
+
     private Diagnosis createDiagnosis() {
         Diagnosis diagnosis = Diagnosis.of(
                 "질병1",
