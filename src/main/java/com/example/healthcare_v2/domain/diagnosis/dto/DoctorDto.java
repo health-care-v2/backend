@@ -22,7 +22,7 @@ public record DoctorDto(
         );
     }
 
-    public static DoctorDto of(Long doctorId) {
+    public static DoctorDto from(Long doctorId) {
         return new DoctorDto(
                 doctorId,
                 null,

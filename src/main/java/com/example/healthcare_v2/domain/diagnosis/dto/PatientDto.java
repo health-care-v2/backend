@@ -26,7 +26,7 @@ public record PatientDto(
         );
     }
 
-    public static PatientDto of(Long patientId) {
+    public static PatientDto from(Long patientId) {
         return new PatientDto(
                 patientId,
                 null,
