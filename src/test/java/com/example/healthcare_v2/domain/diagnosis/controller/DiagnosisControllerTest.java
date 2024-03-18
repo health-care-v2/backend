@@ -4,6 +4,7 @@ import com.example.healthcare_v2.config.JsonDataEncoder;
 import com.example.healthcare_v2.config.TestSecurityConfig;
 import com.example.healthcare_v2.domain.diagnosis.dto.DiagnosisDto;
 import com.example.healthcare_v2.domain.diagnosis.dto.request.DiagnosisRequestDto;
+import com.example.healthcare_v2.domain.diagnosis.dto.request.DiagnosisUpdateRequestDto;
 import com.example.healthcare_v2.domain.diagnosis.service.DiagnosisService;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,8 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -86,6 +86,37 @@ class DiagnosisControllerTest {
                 .andExpect(jsonPath("message").isEmpty()
                 );
         then(diagnosisService).should().getDiagnosesByPatient(any(Pageable.class), eq(patientId));
+    }
+
+    @WithMockUser(username = "1")
+    @DisplayName("진료 정보 업데이트")
+    @Test
+    void givenUpdateDiagnosisInfo_whenUpdateDiagnosis_thenReturns200() throws Exception {
+        // given
+        Long diagnosisId = 1L;
+        DiagnosisUpdateRequestDto diagnosisUpdateRequestDto = createDiagnosisUpdateRequestDto();
+        DiagnosisDto diagnosisDto = diagnosisUpdateRequestDto.toDto(diagnosisId);
+        willDoNothing().given(diagnosisService).updateDiagnosis(diagnosisDto);
+
+        // when & then
+        mvc.perform(put("/v2/diagnosis/" + diagnosisId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonDataEncoder.encode(diagnosisUpdateRequestDto)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value(200))
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("message").isEmpty()
+                );
+        then(diagnosisService).should().updateDiagnosis(diagnosisDto);
+    }
+
+    private DiagnosisUpdateRequestDto createDiagnosisUpdateRequestDto() {
+        return new DiagnosisUpdateRequestDto(
+                "질병변경1",
+                "질병내용변경1",
+                1L,
+                1L
+        );
     }
 
     private DiagnosisRequestDto createDiagnosisRequestDto() {
