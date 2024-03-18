@@ -52,4 +52,10 @@ public class Diagnosis extends BaseEntity {
         return new Diagnosis(disease, content, doctor, patient);
     }
 
+    public void changeDiagnosis(String disease, String content, Patient patient, Doctor doctor) {
+        this.disease = disease;
+        this.content = content;
+        this.patient = patient;
+        this.doctor = doctor;
+    }
 }

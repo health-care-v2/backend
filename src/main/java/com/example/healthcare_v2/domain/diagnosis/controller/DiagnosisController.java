@@ -1,6 +1,7 @@
 package com.example.healthcare_v2.domain.diagnosis.controller;
 
 import com.example.healthcare_v2.domain.diagnosis.dto.request.DiagnosisRequestDto;
+import com.example.healthcare_v2.domain.diagnosis.dto.request.DiagnosisUpdateRequestDto;
 import com.example.healthcare_v2.domain.diagnosis.dto.response.DiagnosisResponseDto;
 import com.example.healthcare_v2.domain.diagnosis.service.DiagnosisService;
 import com.example.healthcare_v2.global.utill.ResponseDTO;
@@ -41,6 +42,14 @@ public class DiagnosisController {
             @PageableDefault(size = 10, sort = {"id"}, direction = Sort.Direction.ASC) Pageable pageable) {
         Page<DiagnosisResponseDto> diagnosis = diagnosisService.getDiagnosesByPatient(pageable, patientId).map(DiagnosisResponseDto::from);
         return ResponseEntity.ok(ResponseDTO.okWithData(diagnosis));
+    }
+
+    @PutMapping("/{diagnosisId}")
+    public ResponseEntity<ResponseDTO<Void>> updateDiagnosis(
+            @PathVariable("diagnosisId") Long diagnosisId,
+            @RequestBody DiagnosisUpdateRequestDto diagnosisUpdateRequestDto) {
+        diagnosisService.updateDiagnosis(diagnosisUpdateRequestDto.toDto(diagnosisId));
+        return ResponseEntity.ok(ResponseDTO.ok());
     }
 
 }

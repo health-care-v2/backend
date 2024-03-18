@@ -28,6 +28,7 @@ public record DiagnosisDto(
         return new DiagnosisDto(id, disease, content, diagnosisImageDtos, prescriptionDtos, patientDto, doctorDto);
     }
 
+
     public static DiagnosisDto of(String disease,
                                   String content,
                                   List<DiagnosisImageDto> diagnosisImageDtos,
@@ -44,6 +45,15 @@ public record DiagnosisDto(
                                   DoctorDto doctorDto
     ) {
         return new DiagnosisDto(null, disease, content, null, null, patientDto, doctorDto);
+    }
+
+    public static DiagnosisDto of(Long diagnosisId,
+                                  String disease,
+                                  String content,
+                                  PatientDto patientDto,
+                                  DoctorDto doctorDto
+    ) {
+        return new DiagnosisDto(diagnosisId, disease, content, null, null, patientDto, doctorDto);
     }
 
     public Diagnosis toEntity(Patient patient, Doctor doctor) {
