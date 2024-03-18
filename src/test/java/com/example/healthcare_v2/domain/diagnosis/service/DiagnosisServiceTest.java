@@ -9,6 +9,7 @@ import com.example.healthcare_v2.domain.doctor.entity.Doctor;
 import com.example.healthcare_v2.domain.doctor.repository.DoctorRepository;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
 import com.example.healthcare_v2.domain.patient.repository.PatientRepository;
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -81,6 +82,70 @@ class DiagnosisServiceTest {
         // Then
         assertThat(diagnosis).isEqualTo(Page.empty());
         then(diagnosisRepository).should().findByPatient_id(pageable, patientId);
+    }
+
+    @DisplayName("진료변경 정보를 입력하면, 진료 정보가 변경된다.")
+    @Test
+    void givenDiagnosisUpdateInfo_whenUpdatingDiagnosis_thenUpdatedDiagnosis() {
+        // Given
+        DiagnosisDto dto = createDiagnosisDto("질병업데이트", "질병내용업데이트");
+        Patient patient = createPatient();
+        Doctor doctor = createDoctor();
+        Diagnosis diagnosis = createDiagnosis();
+
+        given(diagnosisRepository.getReferenceById(dto.id())).willReturn(diagnosis);
+        given(patientRepository.getReferenceById(dto.patientDto().id())).willReturn(patient);
+        given(doctorRepository.getReferenceById(dto.doctorDto().id())).willReturn(doctor);
+
+        // When
+        sut.updateDiagnosis(dto);
+
+        // Then
+        assertThat(diagnosis)
+                .hasFieldOrPropertyWithValue("disease", dto.disease())
+                .hasFieldOrPropertyWithValue("content", dto.content());
+        then(diagnosisRepository).should().getReferenceById(dto.id());
+        then(patientRepository).should().getReferenceById(dto.patientDto().id());
+        then(doctorRepository).should().getReferenceById(dto.doctorDto().id());
+    }
+
+    @DisplayName("진료변경 정보를 입력하면, 진료 정보가 변경된다.")
+    @Test
+    void givenDiagnosisUpdateInfo_whenUpdatingDiagnosis_thenLogsWarning() {
+        // Given
+        DiagnosisDto dto = createDiagnosisDto("질병업데이트", "질병내용업데이트");
+
+        given(diagnosisRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
+
+        // When
+        sut.updateDiagnosis(dto);
+
+        // Then
+        then(diagnosisRepository).should().getReferenceById(dto.id());
+        then(patientRepository).shouldHaveNoInteractions();
+        then(doctorRepository).shouldHaveNoInteractions();
+    }
+
+    private Diagnosis createDiagnosis() {
+        Diagnosis diagnosis = Diagnosis.of(
+                "질병1",
+                "질병내용1",
+                createDoctor(),
+                createPatient()
+        );
+
+        ReflectionTestUtils.setField(diagnosis, "id", 1L);
+
+        return diagnosis;
+    }
+
+    private DiagnosisDto createDiagnosisDto(String disease, String content) {
+        return DiagnosisDto.of(
+                disease,
+                content,
+                PatientDto.from(createPatient()),
+                DoctorDto.from(createDoctor())
+        );
     }
 
     private DiagnosisDto createDiagnosisDto() {
