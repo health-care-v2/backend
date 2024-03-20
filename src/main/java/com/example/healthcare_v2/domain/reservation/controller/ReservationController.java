@@ -50,8 +50,9 @@ public class ReservationController {
             @RequestBody ReservationRequestDto reservationRequestDto,
             Principal principal) {
         Long userId = Long.valueOf(principal.getName());
-        reservationService.saveReservation(reservationRequestDto.toDto(PatientDto.of(userId)));
-        return ResponseEntity.ok(ResponseDTO.ok());
+        ReservationResponseDto reservationResponseDto = ReservationResponseDto
+                .from(reservationService.saveReservation(reservationRequestDto.toDto(PatientDto.of(userId))));
+        return ResponseEntity.ok(ResponseDTO.okWithData(reservationResponseDto));
     }
 
     /**
@@ -62,8 +63,9 @@ public class ReservationController {
             @Valid @RequestBody ReservationUpdateRequestDto reservationUpdateRequestDto,
             Principal principal) {
         Long userId = Long.valueOf(principal.getName());
-        reservationService.updateReservation(reservationUpdateRequestDto.toDto(PatientDto.of(userId)));
-        return ResponseEntity.ok(ResponseDTO.ok());
+        ReservationResponseDto reservationResponseDto = ReservationResponseDto
+                .from(reservationService.updateReservation(reservationUpdateRequestDto.toDto(PatientDto.of(userId))));
+        return ResponseEntity.ok(ResponseDTO.okWithData(reservationResponseDto));
     }
 
     /**

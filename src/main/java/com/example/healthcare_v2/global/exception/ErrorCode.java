@@ -15,6 +15,11 @@ public enum ErrorCode {
     DIARY_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당하는 일기가 존재하지 않습니다."),
     USER_NOT_MATCH(HttpStatus.BAD_REQUEST, "유저가 일치하지 않습니다."),
 
+    // RESERVATION
+    RESERVATION_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당하는 예약이 존재하지 않습니다."),
+    RESERVATION_PATIENT_NOT_MATCH(HttpStatus.BAD_REQUEST, "예약 환자와 일치하지 않습니다."),
+
+
     // 5xx - 서버 에러
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 에러");
 
