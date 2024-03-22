@@ -11,6 +11,13 @@ public enum ErrorCode {
     INVALID_PASSWORD(HttpStatus.BAD_REQUEST, "비밀번호가 틀렸습니다."),
     USER_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당하는 이메일이 존재하지 않습니다."),
 
+    // DIARY
+    DIARY_NOT_FOUND(HttpStatus.BAD_REQUEST, "해당하는 일기가 존재하지 않습니다."),
+    USER_NOT_MATCH(HttpStatus.BAD_REQUEST, "유저가 일치하지 않습니다."),
+
+    // WISH
+    DUPLICATED_WISH(HttpStatus.BAD_REQUEST, "이미 좋아요를 누른 일기장입니다."),
+
     // 5xx - 서버 에러
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 에러");
 
