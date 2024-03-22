@@ -8,9 +8,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.TestExecutionEvent;
 import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
@@ -21,7 +23,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-@ActiveProfiles(profiles = "test")
 @Transactional
 public class DiaryControllerTest {
 
@@ -36,20 +37,20 @@ public class DiaryControllerTest {
                 .alwaysDo(print())
                 .build();
 
-        patientRepository.save(Patient.builder()
-                .name("test1")
-                .email("test1@naver.com")
-                .encryptedPassword("test1")
-                .phoneNumber("010-0000-0000")
-                .addr1("서울")
-                .addr2("송파구")
-                .build()
-        );
+//        patientRepository.save(Patient.builder()
+//                .name("test1")
+//                .email("test1@naver.com")
+//                .encryptedPassword("test1")
+//                .phoneNumber("010-0000-0000")
+//                .addr1("서울")
+//                .addr2("송파구")
+//                .build()
+//        );
     }
 
     @DisplayName("일기 등록_인증있을경우")
     @Test
-    @WithMockUser(username = "21")
+    @WithUserDetails(value = "test1", setupBefore = TestExecutionEvent.TEST_EXECUTION)
     void postDiary_인증있음() throws Exception {
         mockMvc.perform(
                         post("/v2/diaries")
@@ -78,10 +79,10 @@ public class DiaryControllerTest {
     @Test
     @WithMockUser(username = "17")
     void updateDiary_동일유저() throws Exception {
-        Long diaryId=2L;
+        Long diaryId = 2L;
 
         mockMvc.perform(
-                put("/v2/diaries/{diaryId}",diaryId)
+                put("/v2/diaries/{diaryId}", diaryId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{"
                                 + "\"title\":\"제목\","
@@ -99,10 +100,10 @@ public class DiaryControllerTest {
     @Test
     @WithMockUser(username = "18")
     void updateDiary_다른유저() throws Exception {
-        Long diaryId=2L;
+        Long diaryId = 2L;
 
         mockMvc.perform(
-                put("/v2/diaries/{diaryId}",diaryId)
+                put("/v2/diaries/{diaryId}", diaryId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("{"
                                 + "\"title\":\"제목\","
@@ -123,7 +124,7 @@ public class DiaryControllerTest {
         Long diaryId = 2L;
 
         mockMvc.perform(
-                delete("/v2/diaries/{diaryId}",diaryId)
+                delete("/v2/diaries/{diaryId}", diaryId)
         ).andExpect(status().isOk());
     }
 
