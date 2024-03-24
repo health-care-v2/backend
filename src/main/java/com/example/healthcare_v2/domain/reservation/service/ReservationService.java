@@ -33,7 +33,7 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public Reservation findActiveRservationById(Long reservationId) {
+    public Reservation findActiveReservationById(Long reservationId) {
         Reservation reservation = findById(reservationId);
 
         if (reservation.isDeleted()) {
@@ -57,11 +57,11 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public ReservationDto getReservation(Long reservationId) {
-        return ReservationDto.from(findActiveRservationById(reservationId));
+        return ReservationDto.from(findActiveReservationById(reservationId));
     }
 
     public ReservationDto updateReservation(ReservationDto dto) {
-        Reservation reservation = findActiveRservationById(dto.id());
+        Reservation reservation = findActiveReservationById(dto.id());
         Patient patient = patientService.findById(dto.patientDto().id());
         Doctor doctor = doctorService.findById(dto.doctorDto().id());
 
@@ -76,7 +76,7 @@ public class ReservationService {
     }
 
     public void cancelReservation(Long reservationId, Long patientId) {
-        Reservation reservation = findActiveRservationById(reservationId);
+        Reservation reservation = findActiveReservationById(reservationId);
         Patient patient = patientService.findById(patientId);
 
         if (!reservation.getPatient().equals(patient)) {
