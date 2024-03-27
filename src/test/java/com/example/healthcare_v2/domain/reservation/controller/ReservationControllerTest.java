@@ -4,13 +4,15 @@ import com.example.healthcare_v2.config.JsonDataEncoder;
 import com.example.healthcare_v2.config.TestSecurityConfig;
 import com.example.healthcare_v2.domain.doctor.entity.Doctor;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
+import com.example.healthcare_v2.domain.patient.exception.UserNotFoundException;
 import com.example.healthcare_v2.domain.reservation.dto.DoctorDto;
 import com.example.healthcare_v2.domain.reservation.dto.PatientDto;
 import com.example.healthcare_v2.domain.reservation.dto.ReservationDto;
 import com.example.healthcare_v2.domain.reservation.dto.request.ReservationRequestDto;
 import com.example.healthcare_v2.domain.reservation.dto.request.ReservationUpdateRequestDto;
+import com.example.healthcare_v2.domain.reservation.exception.ReservationNotFoundException;
+import com.example.healthcare_v2.domain.reservation.exception.ReservationPatientNotMatchException;
 import com.example.healthcare_v2.domain.reservation.service.ReservationService;
-import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({TestSecurityConfig.class, JsonDataEncoder.class})
 @WebMvcTest(ReservationController.class)
 class ReservationControllerTest {
+    public static final String RESERVATION_PATIENT_NOT_MATCH_EXCEPTION_MSG = "예약 환자와 일치하지 않습니다.";
+    public static final String USER_NOT_FOUND_EXCEPTION_MSG = "해당하는 이메일이 존재하지 않습니다.";
+    public static final String RESERVATION_NOT_FOUND_EXCEPTION_MSG = "해당하는 예약이 존재하지 않습니다.";
+
     @Autowired private JsonDataEncoder jsonDataEncoder;
 
     @Autowired private MockMvc mvc;
@@ -57,7 +63,7 @@ class ReservationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data").hasJsonPath())
-                .andExpect(jsonPath("message").isEmpty()
+                .andExpect(jsonPath("$.message").isEmpty()
                 );
         then(reservationService).should().getReservations(any(Pageable.class));
     }
@@ -68,14 +74,14 @@ class ReservationControllerTest {
     void givenReservationId_whenGetReservation_thenReturns200() throws Exception {
         // given
         ReservationDto reservationDto = createReservationDto();
-        given(reservationService.getReservation(reservationDto.id())).willReturn(createReservationDto());
+        given(reservationService.getReservation(reservationDto.id())).willReturn(reservationDto);
 
         // when & then
         mvc.perform(get("/v2/reservations/" + reservationDto.id()))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data").exists())
-                .andExpect(jsonPath("message").isEmpty()
+                .andExpect(jsonPath("$.message").isEmpty()
                 );
         then(reservationService).should().getReservation(reservationDto.id());
     }
@@ -87,27 +93,27 @@ class ReservationControllerTest {
         // given
         Long reservationId = 1L;
         given(reservationService.getReservation(reservationId))
-                .willThrow(new EntityNotFoundException("예약이 없습니다. - reservationId: " + reservationId));
+                .willThrow(new ReservationNotFoundException());
 
         // when & then
         mvc.perform(get("/v2/reservations/" + reservationId))
-                .andExpect(status().is5xxServerError())
-                .andExpect(jsonPath("$.code").value(500))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.code").value(400))
                 .andExpect(jsonPath("$.data").isEmpty())
-                .andExpect(jsonPath("message").value("서버 에러!")
+                .andExpect(jsonPath("$.message").value(RESERVATION_NOT_FOUND_EXCEPTION_MSG)
                 );
         then(reservationService).should().getReservation(reservationId);
     }
 
     @WithMockUser(username = "1")
-    @DisplayName("예약 하기")
+    @DisplayName("예약 하기 - 성공")
     @Test
     void givenReservationInfo_whenCreateNewReservation_thenReturns200() throws Exception {
         // given
         Long patientId = 1L;
         ReservationRequestDto reservationRequestDto = createReservationRequestDto();
         ReservationDto reservationDto = reservationRequestDto.toDto(PatientDto.of(patientId));
-        willDoNothing().given(reservationService).saveReservation(reservationDto);
+        given(reservationService.saveReservation(reservationDto)).willReturn(reservationDto);
 
         // when & then
         mvc.perform(post("/v2/reservations")
@@ -115,21 +121,43 @@ class ReservationControllerTest {
                         .content(jsonDataEncoder.encode(reservationRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.data").isEmpty())
-                .andExpect(jsonPath("message").isEmpty()
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.message").isEmpty()
                 );
         then(reservationService).should().saveReservation(reservationDto);
     }
 
     @WithMockUser(username = "1")
-    @DisplayName("예약 변경")
+    @DisplayName("예약 하기 - 실패")
+    @Test
+    void givenReservationInfo_whenCreateNewReservation_thenReturns400() throws Exception {
+        // given
+        Long patientId = 1L;
+        ReservationRequestDto reservationRequestDto = createReservationRequestDto();
+        ReservationDto reservationDto = reservationRequestDto.toDto(PatientDto.of(patientId));
+        given(reservationService.saveReservation(reservationDto)).willThrow(new UserNotFoundException());
+
+        // when & then
+        mvc.perform(post("/v2/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonDataEncoder.encode(reservationRequestDto)))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("$.message").value(USER_NOT_FOUND_EXCEPTION_MSG)
+                );
+        then(reservationService).should().saveReservation(reservationDto);
+    }
+
+    @WithMockUser(username = "1")
+    @DisplayName("예약 변경 - 성공")
     @Test
     void givenUpdateReservationInfo_whenUpdateReservation_thenReturns200() throws Exception {
         // given
         Long patientId = 1L;
         ReservationUpdateRequestDto reservationUpdateRequestDto = createReservationUpdateRequestDto();
         ReservationDto reservationDto = reservationUpdateRequestDto.toDto(PatientDto.of(patientId));
-        willDoNothing().given(reservationService).updateReservation(reservationDto);
+        given(reservationService.updateReservation(reservationDto)).willReturn(reservationDto);
 
         // when & then
         mvc.perform(put("/v2/reservations")
@@ -137,14 +165,36 @@ class ReservationControllerTest {
                         .content(jsonDataEncoder.encode(reservationUpdateRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.data").isEmpty())
-                .andExpect(jsonPath("message").isEmpty()
+                .andExpect(jsonPath("$.data").exists())
+                .andExpect(jsonPath("$.message").isEmpty()
                 );
         then(reservationService).should().updateReservation(reservationDto);
     }
 
     @WithMockUser(username = "1")
-    @DisplayName("예약 삭제")
+    @DisplayName("예약 변경 - 실패")
+    @Test
+    void givenUpdateReservationInfo_whenUpdateReservation_thenReturns400() throws Exception {
+        // given
+        Long patientId = 1L;
+        ReservationUpdateRequestDto reservationUpdateRequestDto = createReservationUpdateRequestDto();
+        ReservationDto reservationDto = reservationUpdateRequestDto.toDto(PatientDto.of(patientId));
+        given(reservationService.updateReservation(reservationDto)).willThrow(new ReservationPatientNotMatchException());
+
+        // when & then
+        mvc.perform(put("/v2/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonDataEncoder.encode(reservationUpdateRequestDto)))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("$.message").value(RESERVATION_PATIENT_NOT_MATCH_EXCEPTION_MSG)
+                );
+        then(reservationService).should().updateReservation(reservationDto);
+    }
+
+    @WithMockUser(username = "1")
+    @DisplayName("예약 삭제 - 성공")
     @Test
     void givenReservationIdAndPatientId_whenCancelReservation_thenReturns200() throws Exception {
         // given
@@ -157,7 +207,28 @@ class ReservationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
                 .andExpect(jsonPath("$.data").isEmpty())
-                .andExpect(jsonPath("message").isEmpty()
+                .andExpect(jsonPath("$.message").isEmpty()
+                );
+        then(reservationService).should().cancelReservation(reservationId, patientId);
+    }
+
+    @WithMockUser(username = "1")
+    @DisplayName("예약 삭제 - 실패")
+    @Test
+    void givenReservationIdAndPatientId_whenCancelReservation_thenReturns400() throws Exception {
+        // given
+        Long reservationId = 1L;
+        Long patientId = 1L;
+        doThrow(new ReservationPatientNotMatchException())
+                .when(reservationService)
+                .cancelReservation(reservationId, patientId);
+
+        // when & then
+        mvc.perform(delete("/v2/reservations/" + reservationId))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("$.message").value(RESERVATION_PATIENT_NOT_MATCH_EXCEPTION_MSG)
                 );
         then(reservationService).should().cancelReservation(reservationId, patientId);
     }

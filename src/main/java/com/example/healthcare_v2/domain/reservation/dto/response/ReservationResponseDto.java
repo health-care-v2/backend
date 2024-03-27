@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record ReservationResponseDto(
+        Long id,
         String symptom,
         LocalDate reservationDate,
         LocalTime reservationTime,
@@ -15,7 +16,9 @@ public record ReservationResponseDto(
         DoctorDto doctorDto) {
 
     public static ReservationResponseDto from(ReservationDto reservationDto) {
-        return new ReservationResponseDto(reservationDto.symptom(),
+        return new ReservationResponseDto(
+                reservationDto.id(),
+                reservationDto.symptom(),
                 reservationDto.reservationDate(),
                 reservationDto.reservationTime(),
                 reservationDto.patientDto(),
