@@ -81,7 +81,4 @@ public class Reservation extends BaseEntity {
         return new Reservation(symptom, reservationDate, reservationTime, doctor, patient);
     }
 
-    public boolean isDeleted() {
-        return deletedAt != null;
-    }
 }
