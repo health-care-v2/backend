@@ -76,7 +76,7 @@ class ReservationServiceTest {
         then(reservationRepository).should().findById(reservationId);
     }
 
-    @DisplayName("예약 id를 입력하면, 삭제되지 않은 예약정보를 불러온다")
+    @DisplayName("삭제 되지 않은 예약 id를 입력하면, 예약정보를 불러온다")
     @Test
     void givenDeletedReservationId_whenFindActiveReservation_thenThrowsException() {
         // Given
