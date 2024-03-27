@@ -4,11 +4,14 @@ import com.example.healthcare_v2.domain.diagnosis.dto.DiagnosisDto;
 import com.example.healthcare_v2.domain.diagnosis.dto.DoctorDto;
 import com.example.healthcare_v2.domain.diagnosis.dto.PatientDto;
 import com.example.healthcare_v2.domain.diagnosis.entity.Diagnosis;
+import com.example.healthcare_v2.domain.diagnosis.exception.DiagnosisNotFoundException;
 import com.example.healthcare_v2.domain.diagnosis.repository.DiagnosisRepository;
 import com.example.healthcare_v2.domain.doctor.entity.Doctor;
 import com.example.healthcare_v2.domain.doctor.repository.DoctorRepository;
+import com.example.healthcare_v2.domain.doctor.service.DoctorService;
 import com.example.healthcare_v2.domain.patient.entity.Patient;
 import com.example.healthcare_v2.domain.patient.repository.PatientRepository;
+import com.example.healthcare_v2.domain.patient.service.PatientService;
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -20,7 +23,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.LocalDateTime;
+import java.util.Optional;
+
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
@@ -31,44 +38,115 @@ import static org.mockito.BDDMockito.then;
 class DiagnosisServiceTest {
     @InjectMocks private DiagnosisService sut;
     @Mock private DiagnosisRepository diagnosisRepository;
-    @Mock private PatientRepository patientRepository;
-    @Mock private DoctorRepository doctorRepository;
+    @Mock private PatientService patientService;
+    @Mock private DoctorService doctorService;
 
-    @DisplayName("진료정보를 입력하면, 진료정보가 저장된다.")
+    @DisplayName("진단 id를 입력하면, 진단 정보를 불러온다.")
+    @Test
+    void givenDiagnosisId_whenFindDiagnosis_thenReturnsDiagnosis() {
+        // Given
+        Long diagnosisId = 1L;
+        Diagnosis diagnosis = createDiagnosis();
+        given(diagnosisRepository.findById(diagnosisId)).willReturn(Optional.ofNullable(diagnosis));
+
+        // When
+        Diagnosis resultDiagnosis = sut.findById(diagnosisId);
+
+        // Then
+        assertThat(resultDiagnosis).isEqualTo(diagnosis);
+        then(diagnosisRepository).should().findById(diagnosisId);
+    }
+
+    @DisplayName("없는 진단 id를 입력하면, 예외를 발생시킨다.")
+    @Test
+    void givenDiagnosisId_whenFindDiagnosis_thenThrowsException() {
+        // Given
+        Long diagnosisId = 1L;
+        Diagnosis diagnosis = createDiagnosis();
+        given(diagnosisRepository.findById(diagnosisId)).willReturn(Optional.empty());
+
+        // When
+        DiagnosisNotFoundException exception = assertThrows(DiagnosisNotFoundException.class,
+                () -> sut.findById(diagnosisId)
+        );
+
+        // Then
+        assertThat(exception).isInstanceOf(DiagnosisNotFoundException.class);
+        then(diagnosisRepository).should().findById(diagnosisId);
+    }
+
+    @DisplayName("삭제되지 않은 진단 id를 입력하면, 진단 정보를 불러온다.")
+    @Test
+    void givenDiagnosisId_whenFindActiveDiagnosis_thenReturnsDiagnosis() {
+        // Given
+        Long diagnosisId = 1L;
+        Diagnosis diagnosis = createDiagnosis();
+        given(diagnosisRepository.findById(diagnosisId)).willReturn(Optional.ofNullable(diagnosis));
+
+        // When
+        Diagnosis resultDiagnosis = sut.findActiveDiagnosisById(diagnosisId);
+
+        // Then
+        assertThat(resultDiagnosis).isEqualTo(diagnosis);
+        then(diagnosisRepository).should().findById(diagnosisId);
+    }
+
+    @DisplayName("삭제된 진단 id를 입력하면, 예외를 발생시킨다.")
+    @Test
+    void givenDiagnosisId_whenFindActiveDiagnosis_thenThrowsException() {
+        // Given
+        Long diagnosisId = 1L;
+        Diagnosis diagnosis = createDeletedDiagnosis();
+        given(diagnosisRepository.findById(diagnosisId)).willReturn(Optional.ofNullable(diagnosis));
+
+        // When
+        DiagnosisNotFoundException exception = assertThrows(DiagnosisNotFoundException.class,
+                () -> sut.findActiveDiagnosisById(diagnosisId)
+        );
+
+        // Then
+        assertThat(exception).isInstanceOf(DiagnosisNotFoundException.class);
+        then(diagnosisRepository).should().findById(diagnosisId);
+    }
+
+
+    @DisplayName("진단정보를 입력하면, 진단정보가 저장된다.")
     @Test
     void givenDiagnosisInfo_whenSavingDiagnosis_thenSavedDiagnosis() {
         // Given
         DiagnosisDto dto = createDiagnosisDto();
         Patient patient = createPatient();
         Doctor doctor = createDoctor();
-        given(patientRepository.getReferenceById(dto.patientDto().id())).willReturn(patient);
-        given(doctorRepository.getReferenceById(dto.doctorDto().id())).willReturn(doctor);
+        Diagnosis diagnosis = createDiagnosis();
+        given(patientService.findById(dto.patientDto().id())).willReturn(patient);
+        given(doctorService.findById(dto.doctorDto().id())).willReturn(doctor);
+        given(diagnosisRepository.save(any(Diagnosis.class))).willReturn(diagnosis);
 
         // When
-        sut.saveDiagnosis(dto);
+        DiagnosisDto diagnosisDto = sut.saveDiagnosis(dto);
 
         // Then
-        then(patientRepository).should().getReferenceById(dto.patientDto().id());
-        then(doctorRepository).should().getReferenceById(dto.doctorDto().id());
+        then(patientService).should().findById(dto.patientDto().id());
+        then(doctorService).should().findById(dto.doctorDto().id());
         then(diagnosisRepository).should().save(any(Diagnosis.class));
     }
 
-    @DisplayName("모든 진료를 조회하면, 페이징된 진료정보들을 반환한다.")
+    @DisplayName("모든 진단를 조회하면, 페이징된 진단정보들을 반환한다.")
     @Test
     void givenPageInfo_whenSearchingDiagnoses_thenDiagnoses() {
         // Given
         Pageable pageable = Pageable.ofSize(10);
-        given(diagnosisRepository.findAll(pageable)).willReturn(Page.empty());
+        given(diagnosisRepository.findAllByDeletedAtIsNull(pageable)).willReturn(Page.empty());
 
         // When
         Page<DiagnosisDto> diagnosis = sut.getDiagnoses(pageable);
 
         // Then
         assertThat(diagnosis).isEqualTo(Page.empty());
-        then(diagnosisRepository).should().findAll(pageable);
+        then(diagnosisRepository).should().findAllByDeletedAtIsNull(pageable);
     }
 
-    @DisplayName("환자 id로 진료를 조회하면, 페이징 된 환자 id에 해당되는 진료정보들을 반환한다.")
+    @DisplayName("환자 id로 진단를 조회하면, 페이징 된 환자 id에 해당되는 진단정보들을 반환한다.")
     @Test
     void givenPageInfoAndPatientId_whenSearchingDiagnosesByPatient_thenDiagnoses() {
         // Given
@@ -84,7 +162,7 @@ class DiagnosisServiceTest {
         then(diagnosisRepository).should().findByPatient_id(pageable, patientId);
     }
 
-    @DisplayName("진료변경 정보를 입력하면, 진료 정보가 변경된다.")
+    @DisplayName("진단변경 정보를 입력하면, 진단 정보가 변경된다.")
     @Test
     void givenDiagnosisUpdateInfo_whenUpdatingDiagnosis_thenUpdatedDiagnosis() {
         // Given
@@ -93,50 +171,38 @@ class DiagnosisServiceTest {
         Doctor doctor = createDoctor();
         Diagnosis diagnosis = createDiagnosis();
 
-        given(diagnosisRepository.getReferenceById(dto.id())).willReturn(diagnosis);
-        given(patientRepository.getReferenceById(dto.patientDto().id())).willReturn(patient);
-        given(doctorRepository.getReferenceById(dto.doctorDto().id())).willReturn(doctor);
+        given(diagnosisRepository.findById(dto.id())).willReturn(Optional.ofNullable(diagnosis));
+        given(patientService.findById(dto.patientDto().id())).willReturn(patient);
+        given(doctorService.findById(dto.doctorDto().id())).willReturn(doctor);
 
         // When
-        sut.updateDiagnosis(dto);
+        DiagnosisDto diagnosisDto = sut.updateDiagnosis(dto);
 
         // Then
         assertThat(diagnosis)
                 .hasFieldOrPropertyWithValue("disease", dto.disease())
-                .hasFieldOrPropertyWithValue("content", dto.content());
-        then(diagnosisRepository).should().getReferenceById(dto.id());
-        then(patientRepository).should().getReferenceById(dto.patientDto().id());
-        then(doctorRepository).should().getReferenceById(dto.doctorDto().id());
+                .hasFieldOrPropertyWithValue("content", dto.content())
+                .hasFieldOrPropertyWithValue("doctor", doctor)
+                .hasFieldOrPropertyWithValue("patient", patient);
+        then(diagnosisRepository).should().findById(dto.id());
+        then(patientService).should().findById(dto.patientDto().id());
+        then(doctorService).should().findById(dto.doctorDto().id());
     }
 
-    @DisplayName("진료변경 정보를 입력하면, 진료 정보가 변경된다.")
-    @Test
-    void givenDiagnosisUpdateInfo_whenUpdatingDiagnosis_thenLogsWarning() {
-        // Given
-        DiagnosisDto dto = createDiagnosisDto("질병업데이트", "질병내용업데이트");
-
-        given(diagnosisRepository.getReferenceById(dto.id())).willThrow(EntityNotFoundException.class);
-
-        // When
-        sut.updateDiagnosis(dto);
-
-        // Then
-        then(diagnosisRepository).should().getReferenceById(dto.id());
-        then(patientRepository).shouldHaveNoInteractions();
-        then(doctorRepository).shouldHaveNoInteractions();
-    }
-
-    @DisplayName("삭제할 진료 id를 주면, 해당 진료를 삭제한다.")
+    @DisplayName("삭제할 진단 id를 주면, 해당 진단를 삭제한다.")
     @Test
     void givenDiagnosisId_whenDeleteDiagnosis_thenDeletedDiagnosis() {
         // Given
-        Long diagnosis = 1L;
+        Long diagnosisId = 1L;
+        Diagnosis diagnosis = createDiagnosis();
+        given(diagnosisRepository.findById(diagnosisId)).willReturn(Optional.ofNullable(diagnosis));
 
         // When
-        sut.deleteDiagnosis(diagnosis);
+        sut.deleteDiagnosis(diagnosisId);
 
         // Then
-        then(diagnosisRepository).should().deleteById(diagnosis);
+        assertThat(diagnosis.getDeletedAt()).isNotNull();
+        then(diagnosisRepository).should().findById(diagnosisId);
     }
 
     private Diagnosis createDiagnosis() {
@@ -148,6 +214,21 @@ class DiagnosisServiceTest {
         );
 
         ReflectionTestUtils.setField(diagnosis, "id", 1L);
+
+        return diagnosis;
+    }
+
+    private Diagnosis createDeletedDiagnosis() {
+        Diagnosis diagnosis = Diagnosis.of(
+                "질병1",
+                "질병내용1",
+                createDoctor(),
+                createPatient()
+        );
+
+        ReflectionTestUtils.setField(diagnosis, "id", 1L);
+        ReflectionTestUtils.setField(diagnosis, "deletedAt",
+                LocalDateTime.of(2023, 3, 24, 18, 00, 20));
 
         return diagnosis;
     }
