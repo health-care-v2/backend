@@ -37,7 +37,6 @@ import static org.mockito.BDDMockito.then;
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
 
-    public static final String RESERVATION_NOT_FOUND_MSG = "예약이 없습니다. - reservationId: ";
     @InjectMocks private ReservationService sut;
     @Mock private ReservationRepository reservationRepository;
     @Mock private PatientService patientService;
