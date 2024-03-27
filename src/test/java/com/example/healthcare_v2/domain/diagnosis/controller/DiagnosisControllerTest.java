@@ -6,6 +6,7 @@ import com.example.healthcare_v2.domain.diagnosis.dto.DiagnosisDto;
 import com.example.healthcare_v2.domain.diagnosis.dto.request.DiagnosisRequestDto;
 import com.example.healthcare_v2.domain.diagnosis.dto.request.DiagnosisUpdateRequestDto;
 import com.example.healthcare_v2.domain.diagnosis.service.DiagnosisService;
+import com.example.healthcare_v2.domain.patient.exception.UserNotFoundException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,18 +29,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @Import({TestSecurityConfig.class, JsonDataEncoder.class})
 @WebMvcTest(DiagnosisController.class)
 class DiagnosisControllerTest {
+    public static final String USER_NOT_FOUND_EXCEPTION_MSG = "해당하는 이메일이 존재하지 않습니다.";
+
     @Autowired private JsonDataEncoder jsonDataEncoder;
     @Autowired private MockMvc mvc;
     @MockBean private DiagnosisService diagnosisService;
 
     @WithMockUser(username = "1")
-    @DisplayName("진료하기")
+    @DisplayName("진단하기 - 성공")
     @Test
     void givenDiagnosisInfo_whenCreateNewDiagnosis_thenReturns200() throws Exception {
         // given
         DiagnosisRequestDto diagnosisRequestDto = createDiagnosisRequestDto();
         DiagnosisDto diagnosisDto = diagnosisRequestDto.toDto();
-        willDoNothing().given(diagnosisService).saveDiagnosis(diagnosisDto);
+       given(diagnosisService.saveDiagnosis(diagnosisDto)).willReturn(diagnosisDto);
 
         // when & then
         mvc.perform(post("/v2/diagnosis")
@@ -47,14 +50,35 @@ class DiagnosisControllerTest {
                         .content(jsonDataEncoder.encode(diagnosisRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("$.data").exists())
                 .andExpect(jsonPath("message").isEmpty()
                 );
         then(diagnosisService).should().saveDiagnosis(diagnosisDto);
     }
 
     @WithMockUser(username = "1")
-    @DisplayName("진료 전체 조회")
+    @DisplayName("진단하기 - 실패")
+    @Test
+    void givenDiagnosisInfo_whenCreateNewDiagnosis_thenReturns400() throws Exception {
+        // given
+        DiagnosisRequestDto diagnosisRequestDto = createDiagnosisRequestDto();
+        DiagnosisDto diagnosisDto = diagnosisRequestDto.toDto();
+        given(diagnosisService.saveDiagnosis(diagnosisDto)).willThrow(new UserNotFoundException());
+
+        // when & then
+        mvc.perform(post("/v2/diagnosis")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonDataEncoder.encode(diagnosisRequestDto)))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("message").value(USER_NOT_FOUND_EXCEPTION_MSG)
+                );
+        then(diagnosisService).should().saveDiagnosis(diagnosisDto);
+    }
+
+    @WithMockUser(username = "1")
+    @DisplayName("진단 전체 조회")
     @Test
     void givenNoting_whenGetDiagnoses_thenReturns200() throws Exception {
         // given
@@ -71,7 +95,7 @@ class DiagnosisControllerTest {
     }
 
     @WithMockUser(username = "1")
-    @DisplayName("환자 id로 진료 조회")
+    @DisplayName("환자 id로 진단 조회")
     @Test
     void givenPatientId_whenGetDiagnosesByPatient_thenReturns200() throws Exception {
         // given
@@ -89,14 +113,14 @@ class DiagnosisControllerTest {
     }
 
     @WithMockUser(username = "1")
-    @DisplayName("진료 정보 업데이트")
+    @DisplayName("진단 정보 업데이트 - 성공")
     @Test
     void givenUpdateDiagnosisInfo_whenUpdateDiagnosis_thenReturns200() throws Exception {
         // given
         Long diagnosisId = 1L;
         DiagnosisUpdateRequestDto diagnosisUpdateRequestDto = createDiagnosisUpdateRequestDto();
         DiagnosisDto diagnosisDto = diagnosisUpdateRequestDto.toDto(diagnosisId);
-        willDoNothing().given(diagnosisService).updateDiagnosis(diagnosisDto);
+        given(diagnosisService.updateDiagnosis(diagnosisDto)).willReturn(diagnosisDto);
 
         // when & then
         mvc.perform(put("/v2/diagnosis/" + diagnosisId)
@@ -104,14 +128,36 @@ class DiagnosisControllerTest {
                         .content(jsonDataEncoder.encode(diagnosisUpdateRequestDto)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(200))
-                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("$.data").exists())
                 .andExpect(jsonPath("message").isEmpty()
                 );
         then(diagnosisService).should().updateDiagnosis(diagnosisDto);
     }
 
     @WithMockUser(username = "1")
-    @DisplayName("진료 삭제")
+    @DisplayName("진단 정보 업데이트 - 실패")
+    @Test
+    void givenUpdateDiagnosisInfo_whenUpdateDiagnosis_thenReturns400() throws Exception {
+        // given
+        Long diagnosisId = 1L;
+        DiagnosisUpdateRequestDto diagnosisUpdateRequestDto = createDiagnosisUpdateRequestDto();
+        DiagnosisDto diagnosisDto = diagnosisUpdateRequestDto.toDto(diagnosisId);
+        given(diagnosisService.updateDiagnosis(diagnosisDto)).willThrow(new UserNotFoundException());
+
+        // when & then
+        mvc.perform(put("/v2/diagnosis/" + diagnosisId)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonDataEncoder.encode(diagnosisUpdateRequestDto)))
+                .andExpect(status().is4xxClientError())
+                .andExpect(jsonPath("$.code").value(400))
+                .andExpect(jsonPath("$.data").isEmpty())
+                .andExpect(jsonPath("message").value(USER_NOT_FOUND_EXCEPTION_MSG)
+                );
+        then(diagnosisService).should().updateDiagnosis(diagnosisDto);
+    }
+
+    @WithMockUser(username = "1")
+    @DisplayName("진단 삭제")
     @Test
     void givenDiagnosisId_whenDeleteReservation_thenReturns200() throws Exception {
         // given
