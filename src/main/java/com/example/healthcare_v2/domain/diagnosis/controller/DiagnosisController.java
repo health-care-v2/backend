@@ -22,11 +22,12 @@ public class DiagnosisController {
     private final DiagnosisService diagnosisService;
 
     @PostMapping
-    public ResponseEntity<ResponseDTO<Void>> createNewDiagnosis(
+    public ResponseEntity<ResponseDTO<DiagnosisResponseDto>> createNewDiagnosis(
             @RequestBody DiagnosisRequestDto diagnosisRequestDto,
             Principal principal) {
-        diagnosisService.saveDiagnosis(diagnosisRequestDto.toDto());
-        return ResponseEntity.ok(ResponseDTO.ok());
+        DiagnosisResponseDto diagnosisResponseDto = DiagnosisResponseDto
+                .from(diagnosisService.saveDiagnosis(diagnosisRequestDto.toDto()));
+        return ResponseEntity.ok(ResponseDTO.okWithData(diagnosisResponseDto));
     }
 
     @GetMapping
@@ -45,11 +46,12 @@ public class DiagnosisController {
     }
 
     @PutMapping("/{diagnosisId}")
-    public ResponseEntity<ResponseDTO<Void>> updateDiagnosis(
+    public ResponseEntity<ResponseDTO<DiagnosisResponseDto>> updateDiagnosis(
             @PathVariable("diagnosisId") Long diagnosisId,
             @RequestBody DiagnosisUpdateRequestDto diagnosisUpdateRequestDto) {
-        diagnosisService.updateDiagnosis(diagnosisUpdateRequestDto.toDto(diagnosisId));
-        return ResponseEntity.ok(ResponseDTO.ok());
+        DiagnosisResponseDto diagnosisResponseDto = DiagnosisResponseDto
+                .from(diagnosisService.updateDiagnosis(diagnosisUpdateRequestDto.toDto(diagnosisId)));
+        return ResponseEntity.ok(ResponseDTO.okWithData(diagnosisResponseDto));
     }
 
     @DeleteMapping("/{diagnosisId}")
